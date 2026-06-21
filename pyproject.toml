@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "text-see-do"
+version = "0.1.0"
+description = "Text-See-Do: a reproducible text-to-motion pipeline (FSQ tokenizer + LM generator + dynamic/semantic verifiers)"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = [
+    "textseedo*",
+    "tokenizer*",
+    "generator*",
+    "verifiers*",
+    "pipeline*",
+    "scripts*",
+]
+exclude = ["assets*", "data*", "docs*", "experiments*", "logs*"]
+
+[project.scripts]
+tsd-download = "scripts.download_assets:main"
+tsd-prepare-data = "generator.scripts.prepare_dataset:main"
+tsd-generate = "pipeline.generate:main"
+tsd-score = "pipeline.score:main"
+tsd-select = "pipeline.select_best_of_n:main"

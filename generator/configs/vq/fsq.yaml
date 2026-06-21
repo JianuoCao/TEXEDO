@@ -1,0 +1,14 @@
+# FSQ Motion Tokenizer configuration
+# Single codebook: codebook_size = prod(fsq_levels) = 3^5 * 2^5 = 7776
+target: mgpt.archs.motion_tokenizer.FSQTokenizer
+params:
+  nfeats: 36
+  fsq_levels: [3, 3, 3, 3, 3, 2, 2, 2, 2, 2]
+  output_emb_width: 512
+  down_t: 2
+  stride_t: 2
+  width: 512
+  depth: 3
+  dilation_growth_rate: 2
+  norm: 'LN'
+  activation: relu

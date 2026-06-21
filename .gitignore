@@ -1,0 +1,29 @@
+# Downloaded assets & datasets (fetched via scripts/download_assets.py)
+/assets/
+/data/
+
+# Training outputs
+/experiments/
+/logs/
+/outputs/
+wandb/
+*.ckpt
+*.pt
+*.tar
+*.npz
+!tokenizer/normalization/*.npz
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+.env
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/

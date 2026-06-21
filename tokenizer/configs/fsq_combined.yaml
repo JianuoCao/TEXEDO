@@ -1,0 +1,81 @@
+# FSQ Motion Tokenizer — Combined Data (AMASS + Sonic)
+# Based on fsq_config_ln_expA.yaml with data path updated to combined folder.
+#
+# ${oc.env:TSD_ASSETS} / ${oc.env:TSD_DATA} are resolved by OmegaConf at load
+# time (tokenizer/fsq_train.py:load_config); textseedo.paths exports sane
+# in-repo defaults (<repo>/assets, <repo>/data) if the env vars are unset.
+#
+# normalization_stats_file intentionally points at the small stats file that
+# ships in-repo (tokenizer/normalization/...) rather than ${TSD_ASSETS},
+# since it is checked into the release and not downloaded. Run scripts from
+# the repo root (as documented in tokenizer/README.md) so this relative path
+# resolves; pass an absolute path on the CLI/config override if you don't.
+
+model:
+  nfeats: 36
+  fsq_levels: [3, 3, 3, 3, 3, 2, 2, 2, 2, 2]
+  output_emb_width: 512
+  down_t: 2
+  stride_t: 2
+  width: 512
+  depth: 3
+  dilation_growth_rate: 2
+  norm: LN
+  activation: relu
+  upsample_mode: nearest
+  # Stats ship in-repo (small file); the trained checkpoint ships via assets.
+  normalization_stats_file: tokenizer/normalization/fsq_motion_stats_combined.npz
+  normalize_root_delta: true
+  normalize_joint_pos: true
+  normalization_epsilon: 1.0e-6
+
+loss:
+  lambda_root_pos: 1.0
+  lambda_root_quat: 1.0
+  lambda_joint_pos: 2.0
+  lambda_root_vel: 1.0
+  lambda_joint_vel: 1.0
+  lambda_root_acc: 0.5
+  lambda_joint_acc: 0.5
+  recons_loss: l1_smooth
+
+optimizer:
+  lr: 0.00004
+  betas: [0.9, 0.99]
+  weight_decay: 0.0
+
+training:
+  num_epochs: 100
+  batch_size: 256
+  num_workers: 8
+  log_every: 100
+  save_every: 5
+  video_every: 5
+  use_amp: true
+  log_dir: logs-fsq-combinedv2
+  checkpoint_dir: checkpoints/checkpoints-fsq-combinedv2
+
+data:
+  # Prepared dataset layout (see docs/tasks/task5_data.md / CONTRACT.md):
+  # ${TSD_DATA}/CustomCombined/new_joint_vecs
+  data_folder: ${oc.env:TSD_DATA}/CustomCombined/new_joint_vecs
+  val_data_folder: null
+  window_size: 100
+  stride: 5
+  val_stride: 10
+  cache_size_files: 0
+
+wandb:
+  project: fsq-motion
+  name: fsq-LN-combinedv2
+  tags: [fsq, motion, LN, combined, amass, sonic]
+  notes: >
+    Combined AMASS + Sonic data training.
+    Same architecture as expA (LN + root-delta-std + joint-pos-std + acceleration-loss).
+
+scheduler:
+  eta_min: 1.0e-5
+  warmup_epochs: 0
+
+use_wandb: true
+use_cuda: true

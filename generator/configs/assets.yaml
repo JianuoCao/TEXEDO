@@ -1,0 +1,16 @@
+CONFIG_FOLDER: configs
+FOLDER: experiments
+
+TEST:
+  FOLDER: results
+
+DATASET:
+  TASK_ROOT: ${oc.env:TSD_ASSETS}/mGPT_instructions
+  WORD_VERTILIZER_PATH: ${oc.env:TSD_ASSETS}/glove/
+  CUSTOM_COMBINED:
+    ROOT: ${oc.env:TSD_DATA}/CustomCombined
+    SPLIT_ROOT: ${oc.env:TSD_DATA}/CustomCombined
+
+METRIC:
+  TM2T:
+    t2m_path: ${oc.env:TSD_ASSETS}/verifiers/semantic/t2m_custom36_combinedv2/

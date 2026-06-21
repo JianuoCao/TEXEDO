@@ -1,0 +1,34 @@
+# Core (Python 3.10, CUDA 12.4)
+torch==2.5.1
+torchvision==0.20.1
+numpy==1.26.4
+pandas==2.3.3
+PyYAML==6.0.3
+omegaconf
+einops==0.8.1
+tqdm==4.67.1
+
+# FSQ tokenizer (was missing from every original requirements file)
+vector-quantize-pytorch
+
+# Generator (MotionGPT FSQ-multitask)
+pytorch_lightning
+torchmetrics
+transformers
+diffusers
+rich
+shortuuid
+tensorboard
+
+# Verifiers
+scikit-learn
+
+# Assets / dataset download
+huggingface_hub
+
+# Logging / viz
+wandb
+matplotlib
+moviepy
+natsort
+scipy
