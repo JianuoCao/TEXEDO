@@ -24,7 +24,8 @@ tensorboard
 scikit-learn
 
 # Assets / dataset download
-huggingface_hub
+# Pin <1.0: transformers (4.x) requires huggingface-hub>=0.23,<1.0; hub>=1.0 breaks the import.
+huggingface_hub>=0.23,<1.0
 
 # Logging / viz
 wandb

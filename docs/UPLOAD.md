@@ -1,120 +1,65 @@
 # Uploading checkpoints to your own Hugging Face model repo
 
-This repo's `scripts/download_assets.py` expects every checkpoint to live in **one Hugging Face
-model repo** that you control (the public `JianuoCao/TEXEDO` dataset repo is separate and already
-populated). Follow these steps once, after training/collecting the checkpoints listed in
-`docs/MODELS.md`.
+`scripts/download_assets.py` fetches every checkpoint from **one Hugging Face model repo** that you
+control (the public `JianuoCao/TEXEDO` dataset repo is separate and already populated). Because the
+checkpoints already live in this repo's `assets/` folder with the exact layout the manifest expects,
+uploading is just packaging `assets/` and pushing it.
 
 ## 0. Prerequisites
-
 ```bash
 pip install -U huggingface_hub
-huggingface-cli login          # paste a token with `write` access
-```
-
-Create the model repo (pick any name; this doc uses `<you>/text-see-do-checkpoints`):
-
-```bash
+huggingface-cli login                                   # token with `write` access
 huggingface-cli repo create text-see-do-checkpoints --type model
 ```
 
-## 1. Stage the files locally with the exact remote layout
-
-`download_assets.py` downloads each manifest entry's `remote` path verbatim from the repo root, so
-stage a local folder that mirrors it exactly before uploading. Using the **original-tree source
-paths** as upload sources (read-only — do not move/delete anything there):
-
-| Manifest entry | Upload source (original tree, read-only) | Remote path in your HF repo |
-|---|---|---|
-| `fsq_tokenizer` | `GenMimic/stage1-tokenize/fsq/checkpoints/checkpoints-fsq-combined/checkpoint_epoch_95.pt` | `tokenizer/checkpoint_epoch_95.pt` |
-| `fsq_norm_stats` | `GenMimic/stage1-tokenize/fsq/normalization/fsq_motion_stats_combined.npz` | `tokenizer/fsq_motion_stats_combined.npz` |
-| `generator` | `MotionGPT/experiments/mgpt/CustomCombined_Stage2_FSQ_MultiTask-4-30/checkpoints/epoch=489.ckpt` | `generator/epoch=489.ckpt` |
-| `dynamic_verifier` | `MotionGPT/Dynamic_Verifier/runs/v5/checkpoint_last.pt` | `verifiers/dynamic/checkpoint_last.pt` |
-| `dynamic_norm_stats` | `MotionGPT/Dynamic_Verifier/runs/v3/norm_stats.npz` (paired with the `v5` checkpoint — see `docs/MODELS.md`) | `verifiers/dynamic/norm_stats.npz` |
-| `semantic_evaluator` | `MotionGPT/deps/t2m_custom36_combinedv2/custom36/t2m/{text_mot_match,Decomp_SP001_SM001_H512,Comp_v6_KLD01}` packaged as one tarball | `verifiers/semantic/t2m_custom36_combinedv2.tar.gz` |
-| `glove` | `MotionGPT/deps/t2m/glove/` packaged as one tarball | `glove/glove.tar.gz` |
-
-Build the two tarballs (run from anywhere; these only *read* the original trees):
-
+## 1. Build the two tarballs the manifest expects
+Two entries are marked `unpack: true` in `configs/paths.yaml` and ship as `.tar.gz`. Build them from
+the bundled `assets/` (run from the repo root):
 ```bash
-# semantic evaluator
-tar -czf /tmp/t2m_custom36_combinedv2.tar.gz -C /home/jianuo/projects/MotionGPT/deps/t2m_custom36_combinedv2/custom36/t2m \
-    text_mot_match Decomp_SP001_SM001_H512 Comp_v6_KLD01
+mkdir -p upload/{tokenizer,generator,verifiers/dynamic,verifiers/semantic,glove}
 
-# glove
-tar -czf /tmp/glove.tar.gz -C /home/jianuo/projects/MotionGPT/deps/t2m glove
+# semantic evaluator tree -> one archive
+tar -czf upload/verifiers/semantic/t2m_custom36_combinedv2.tar.gz \
+    -C assets/verifiers/semantic t2m_custom36_combinedv2
+
+# glove vocab -> one archive (our_vab_* files at the archive root)
+tar -czf upload/glove/glove.tar.gz -C assets/glove .
 ```
 
-Stage everything else by copying (not moving) the plain files into a scratch upload folder, e.g.:
-
+## 2. Stage the plain checkpoint files (copy from assets/)
 ```bash
-mkdir -p /tmp/upload/{tokenizer,generator,verifiers/dynamic,verifiers/semantic,glove}
-cp /home/jianuo/projects/GenMimic/stage1-tokenize/fsq/checkpoints/checkpoints-fsq-combined/checkpoint_epoch_95.pt \
-    /tmp/upload/tokenizer/
-cp /home/jianuo/projects/GenMimic/stage1-tokenize/fsq/normalization/fsq_motion_stats_combined.npz \
-    /tmp/upload/tokenizer/
-cp "/home/jianuo/projects/MotionGPT/experiments/mgpt/CustomCombined_Stage2_FSQ_MultiTask-4-30/checkpoints/epoch=489.ckpt" \
-    /tmp/upload/generator/
-cp /home/jianuo/projects/MotionGPT/Dynamic_Verifier/runs/v5/checkpoint_last.pt \
-    /tmp/upload/verifiers/dynamic/
-cp /home/jianuo/projects/MotionGPT/Dynamic_Verifier/runs/v3/norm_stats.npz \
-    /tmp/upload/verifiers/dynamic/
-cp /tmp/t2m_custom36_combinedv2.tar.gz /tmp/upload/verifiers/semantic/
-cp /tmp/glove.tar.gz /tmp/upload/glove/
+cp assets/tokenizer/checkpoint_epoch_95.pt          upload/tokenizer/
+cp assets/tokenizer/fsq_motion_stats_combined.npz   upload/tokenizer/
+cp "assets/generator/epoch=489.ckpt"                upload/generator/
+cp assets/verifiers/dynamic/checkpoint_last.pt      upload/verifiers/dynamic/
+cp assets/verifiers/dynamic/norm_stats.npz          upload/verifiers/dynamic/
 ```
 
-## 2. Upload
+The resulting `upload/` mirrors each manifest entry's `remote` path exactly.
 
-For a handful of large files, `hf upload-large-folder` (resumable, parallel) is the most robust
-option:
-
+## 3. Upload
 ```bash
-hf upload-large-folder <you>/text-see-do-checkpoints /tmp/upload --repo-type=model
+# resumable + parallel (best for the 3.4 GB generator ckpt)
+hf upload-large-folder <you>/text-see-do-checkpoints upload --repo-type=model
 ```
+Or file-by-file: `huggingface-cli upload <you>/text-see-do-checkpoints <local> <remote>`.
 
-Or upload file-by-file with `huggingface-cli upload` if you prefer more control / smaller batches:
-
-```bash
-huggingface-cli upload <you>/text-see-do-checkpoints \
-    /tmp/upload/tokenizer/checkpoint_epoch_95.pt tokenizer/checkpoint_epoch_95.pt
-
-huggingface-cli upload <you>/text-see-do-checkpoints \
-    /tmp/upload/tokenizer/fsq_motion_stats_combined.npz tokenizer/fsq_motion_stats_combined.npz
-
-huggingface-cli upload <you>/text-see-do-checkpoints \
-    "/tmp/upload/generator/epoch=489.ckpt" "generator/epoch=489.ckpt"
-
-huggingface-cli upload <you>/text-see-do-checkpoints \
-    /tmp/upload/verifiers/dynamic/checkpoint_last.pt verifiers/dynamic/checkpoint_last.pt
-
-huggingface-cli upload <you>/text-see-do-checkpoints \
-    /tmp/upload/verifiers/dynamic/norm_stats.npz verifiers/dynamic/norm_stats.npz
-
-huggingface-cli upload <you>/text-see-do-checkpoints \
-    /tmp/upload/verifiers/semantic/t2m_custom36_combinedv2.tar.gz verifiers/semantic/t2m_custom36_combinedv2.tar.gz
-
-huggingface-cli upload <you>/text-see-do-checkpoints \
-    /tmp/upload/glove/glove.tar.gz glove/glove.tar.gz
-```
-
-## 3. Point the manifest at your repo
-
+## 4. Point the manifest at your repo
 Edit `configs/paths.yaml`:
-
 ```yaml
 checkpoints:
   hf_repo: <you>/text-see-do-checkpoints   # was: TODO_USER_MODEL_REPO
 ```
 
-## 4. Verify
-
+## 5. Verify
 ```bash
-cd text-see-do
-python scripts/download_assets.py --dry-run   # sanity-check resolution, no network calls
-python scripts/download_assets.py              # actually fetch everything
+python scripts/download_assets.py --dry-run    # resolution only, no network
+python scripts/download_assets.py              # fetch into assets/ on a fresh clone
 ```
+`download_assets.py` downloads each `remote` into `${TSD_ASSETS}/<local>`, extracts any
+`unpack: true` archive, and deletes the archive. The TEXEDO dataset downloads independently via
+`snapshot_download` and needs no setup.
 
-`download_assets.py` will `hf_hub_download` each `remote` path into `${TSD_ASSETS}/<local>` and
-automatically extract any entry marked `unpack: true` (the two `.tar.gz` archives above), then
-delete the archive. The dataset (`JianuoCao/TEXEDO`) downloads independently via
-`snapshot_download` and needs no setup on your part.
+> Note: `assets/` is git-ignored, so the checkpoints are **not** committed to the code repo — they
+> are distributed only through the Hugging Face model repo (or, on this machine, already staged
+> locally for validation).

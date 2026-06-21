@@ -1,4 +1,7 @@
 import os
+import sys
+# Make the repo root importable when run from generator/.
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import json
 import torch
 import torch.nn.functional as F
@@ -20,6 +23,9 @@ from mgpt.data.humanml.utils.word_vectorizer import WordVectorizer
 # identical `convert_to_csv_format` helper with none of that baggage.
 from mgpt.archs.fsq_arch import convert_to_csv_format
 from textseedo.paths import assets
+
+# Run on GPU when available, else CPU (keeps the demo runnable without a GPU).
+DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 def root_pos_to_vel_np(motion, root_dims=3):
@@ -86,7 +92,7 @@ class MatchingScoreEvaluator:
     """Loads the 36-dim evaluator and computes per-sample matching scores."""
 
     def __init__(self,
-                 device='cuda',
+                 device=DEVICE,
                  t2m_path=None,
                  max_motion_length=2048,
                  unit_len=4,
@@ -234,16 +240,16 @@ def demo_ours(task="t2m", num_samples=3, temperature=0.9, top_k=50, top_p=0.95,
     
     # Load checkpoint
     if checkpoint_path is None:
-        # Derive default from config NAME
-        checkpoint_path = os.path.join(
-            "experiments", "mgpt", cfg.NAME, "checkpoints", "last.ckpt")
-        print(f"Checkpoint path not specified, using default: {checkpoint_path}")
+        # Default to the released generator checkpoint named by the config
+        # (TEST.CHECKPOINTS -> ${TSD_ASSETS}/generator/epoch=489.ckpt).
+        checkpoint_path = cfg.TEST.CHECKPOINTS
+        print(f"Checkpoint path not specified, using config default: {checkpoint_path}")
     if not os.path.exists(checkpoint_path):
         print(f"Checkpoint not found!")
         return
     checkpoint = torch.load(checkpoint_path, map_location='cpu', weights_only=False)
     model.load_state_dict(checkpoint['state_dict'])
-    model.eval().cuda()
+    model.eval().to(DEVICE)
 
     # Set sampling parameters for diverse generation
     model.lm.set_sampling_params(temperature=temperature, top_k=top_k, top_p=top_p)
@@ -266,7 +272,7 @@ def demo_ours(task="t2m", num_samples=3, temperature=0.9, top_k=50, top_p=0.95,
     if task == 't2m' and example_path is None:
         try:
             evaluator = MatchingScoreEvaluator(
-                device='cuda', **get_matching_evaluator_params(cfg))
+                device=DEVICE, **get_matching_evaluator_params(cfg))
         except Exception as e:
             print(f"WARNING: Could not load evaluator: {e}")
             print("Matching scores will not be computed.")
@@ -373,7 +379,7 @@ def demo_ours(task="t2m", num_samples=3, temperature=0.9, top_k=50, top_p=0.95,
                         if len(motion_ids) > 0:
                             # Decode tokens → 36-dim via model.vae (works for VQVAE and FSQ)
                             raw_tokens = torch.tensor(
-                                motion_ids, dtype=torch.long).unsqueeze(0).cuda()
+                                motion_ids, dtype=torch.long).unsqueeze(0).to(DEVICE)
                             with torch.no_grad():
                                 gen_36dim = model.vae.decode(
                                     raw_tokens).squeeze(0).cpu().numpy()  # [T, 36]
@@ -405,7 +411,7 @@ def demo_ours(task="t2m", num_samples=3, temperature=0.9, top_k=50, top_p=0.95,
             elif task == "m2t":
                 # Motion-to-Text: generate text from motion
                 # Encode ground truth motion to tokens (following val_m2t_forward)
-                motion_tensor = torch.from_numpy(gt_motion).float().unsqueeze(0).cuda()  # (1, seq, 36)
+                motion_tensor = torch.from_numpy(gt_motion).float().unsqueeze(0).to(DEVICE)  # (1, seq, 36)
                 
                 with torch.no_grad():
                     # Unified encode: returns (tokens [1,T'], lengths [1,]) for both VQVAE and FSQ
@@ -440,7 +446,7 @@ def demo_ours(task="t2m", num_samples=3, temperature=0.9, top_k=50, top_p=0.95,
                 # Motion-to-Motion Prediction: predict future motion
                 
                 # Encode input motion to tokens (following val_m2m_forward)
-                motion_tensor = torch.from_numpy(gt_motion).float().unsqueeze(0).cuda()
+                motion_tensor = torch.from_numpy(gt_motion).float().unsqueeze(0).to(DEVICE)
                 with torch.no_grad():
                     # Unified encode: works for both VQVAE and FSQ
                     motion_tokens_enc, _ = model.vae.encode(motion_tensor)
@@ -469,7 +475,7 @@ def demo_ours(task="t2m", num_samples=3, temperature=0.9, top_k=50, top_p=0.95,
                         
                         if len(motion_ids) > 0:
                             raw_tokens = torch.tensor(
-                                motion_ids, dtype=torch.long).unsqueeze(0).cuda()
+                                motion_ids, dtype=torch.long).unsqueeze(0).to(DEVICE)
                             with torch.no_grad():
                                 pred_36dim = model.vae.decode(
                                     raw_tokens).squeeze(0).cpu().numpy()
@@ -526,12 +532,14 @@ def demo_ours(task="t2m", num_samples=3, temperature=0.9, top_k=50, top_p=0.95,
 
                         if len(motion_ids) > 0:
                             raw_tokens = torch.tensor(
-                                motion_ids, dtype=torch.long).unsqueeze(0).cuda()
+                                motion_ids, dtype=torch.long).unsqueeze(0).to(DEVICE)
                             with torch.no_grad():
                                 gen_36dim = model.vae.decode(
                                     raw_tokens).squeeze(0).cpu().numpy()
                             csv_path = str(output_dir / f'{idx}_{suffix}.csv')
                             np.savetxt(csv_path, convert_to_csv_format(gen_36dim), delimiter=',')
+                            # Also save the raw (T, 36) motion for the scoring pipeline.
+                            np.save(str(output_dir / f'{idx}_{suffix}.npy'), gen_36dim.astype(np.float32))
                             with open(output_dir / f'{idx}_{suffix}.txt', 'w') as f:
                                 f.write(text)
                             generated_outputs += 1

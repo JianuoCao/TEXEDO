@@ -102,10 +102,17 @@ def flatten_texedo(
     motions_out.mkdir(parents=True, exist_ok=True)
     texts_out.mkdir(parents=True, exist_ok=True)
 
+    # When --limit is set, take up to `limit` samples from EACH split so the resulting
+    # mini-dataset has non-empty train/val/test (the datamodule needs all three).
+    per_split_count: dict[str, int] = {}
+
     ids: list[str] = []
     for row in _iter_index_rows(texedo_dir):
-        if limit is not None and len(ids) >= limit:
-            break
+        if limit is not None:
+            split = row.get("split", "train")
+            if per_split_count.get(split, 0) >= limit:
+                continue
+            per_split_count[split] = per_split_count.get(split, 0) + 1
 
         sample_id = row["id"]
         motion_src = texedo_dir / row["motion_path"]

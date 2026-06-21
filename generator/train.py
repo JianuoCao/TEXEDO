@@ -1,4 +1,10 @@
 import os
+import sys
+# Make the repo root importable when run from generator/, and set TSD_ASSETS/TSD_DATA
+# env defaults so config ${oc.env:...} interpolation resolves.
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+import textseedo.paths  # noqa: F401,E402
+
 import glob
 import torch
 import pytorch_lightning as pl

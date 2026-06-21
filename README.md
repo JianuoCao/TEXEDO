@@ -63,26 +63,19 @@ You can skip the exports to use the defaults (`./assets`, `./data`).
 | GloVe vocab | `glove/our_vab_data.npy`, `glove/our_vab_idx.pkl`, `glove/our_vab_words.pkl` | semantic text encoding | small |
 | flan-t5-base | *(not stored — pulled from HF `google/flan-t5-base` at runtime)* | generator LM | auto |
 
-Pick **one** of:
-
-**Option A — you have the checkpoints locally** (fastest; no upload needed):
+Fetch them from the Hugging Face Hub:
 ```bash
-python scripts/stage_local_assets.py --dry-run   # preview the copies
-python scripts/stage_local_assets.py             # copy local checkpoints into assets/
-```
-Pass `--<source>` flags if your originals are elsewhere (see `--help`).
-
-**Option B — download from the Hugging Face Hub** (for public users):
-```bash
-# First set checkpoints.hf_repo in configs/paths.yaml (see docs/UPLOAD.md), then:
-python scripts/download_assets.py --dry-run
-python scripts/download_assets.py
+# set checkpoints.hf_repo in configs/paths.yaml first (see docs/UPLOAD.md), then:
+python scripts/download_assets.py --dry-run     # show what will be fetched (no network)
+python scripts/download_assets.py               # download into assets/
 ```
 
 Verify placement any time:
 ```bash
 find assets -maxdepth 4 -type f | sort
 ```
+> The dataset is public, but the checkpoints must be hosted in a model repo you control — see
+> [docs/UPLOAD.md](docs/UPLOAD.md) to publish them and set `checkpoints.hf_repo`.
 
 ---
 
@@ -104,15 +97,16 @@ Result: `data/CustomCombined/{new_joint_vecs/, texts/, TOKENS_FSQ/, train|val|te
 Needs: generator + FSQ + both verifiers + GloVe staged in step 2.
 ```bash
 # (a) generate N candidates for a prompt
-python -m pipeline.generate --task t2m --num-samples 8 --prompt "a person waves with the right hand"
+python -m pipeline.generate --prompt "a person waves with the right hand" \
+    --num-samples 8 --out-dir candidates/
 
-# (b) score every candidate with both verifiers  (use the candidate dir printed by step a)
-python -m pipeline.score --motion-dir <candidates_dir> \
+# (b) score every candidate with both verifiers
+python -m pipeline.score --motion-dir candidates/ \
     --caption "a person waves with the right hand" --output scores.csv
 
 # (c) pick the best and copy it out
 python -m pipeline.select_best_of_n --scores scores.csv \
-    --motion-dir <candidates_dir> --copy-best-to best/
+    --motion-dir candidates/ --copy-best-to best/
 
 # (d) visualize the winner (matplotlib summary PNG)
 python scripts/visualize_npz.py --input-dir best/ --output-dir viz/

@@ -8,9 +8,9 @@ that paths and the motion format are defined in exactly one place.
 | `paths.py` | Path resolver. Exposes `REPO_ROOT`, `ASSETS_ROOT` (`$TSD_ASSETS` or `<repo>/assets`), `DATA_ROOT` (`$TSD_DATA` or `<repo>/data`) and helpers `assets(*p)`, `data(*p)`, `repo(*p)`. Importing it also exports `TSD_ASSETS`/`TSD_DATA` into the environment so YAML `${oc.env:TSD_ASSETS}` interpolation resolves identically. |
 | `motion_format.py` | The 36-dim motion layout constants: `NFEATS=36`, `ROOT_POS_SLICE`, `ROOT_QUAT_SLICE`, `JOINT_SLICE`, the 29 `JOINT_NAMES` (Unitree G1 order), and `FPS=50`. |
 
-Why it exists: the original code had `/home/jianuo/...` and `/data/...` hardcoded everywhere.
-Here, no absolute path is baked in — checkpoints resolve under `ASSETS_ROOT` and datasets under
-`DATA_ROOT`, both overridable with the `TSD_ASSETS` / `TSD_DATA` environment variables.
+Why it exists: no absolute path is baked into the codebase. Checkpoints resolve under
+`ASSETS_ROOT` and datasets under `DATA_ROOT`, both overridable with the `TSD_ASSETS` /
+`TSD_DATA` environment variables (defaulting to `./assets` and `./data`).
 
 ```python
 from textseedo.paths import assets, data

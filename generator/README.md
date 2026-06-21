@@ -4,12 +4,13 @@ A flan-t5-base language model over FSQ motion tokens, trained multitask (text→
 motion prediction). Stage 1 (the FSQ tokenizer) is frozen; this stage trains the LM.
 
 ## Package
-`mgpt/` — the model/data/arch package (import name `mgpt`). Key pieces:
+`mgpt/` — the core package (import name `mgpt`), holding `archs`, `models`, `data`, `losses`,
+`metrics`, `utils`. Key pieces:
 - `mgpt/models/mgpt.py` — the `MotionGPT` Lightning module.
 - `mgpt/archs/mgpt_lm.py` — flan-t5 LM wrapper (loads `google/flan-t5-base` from the HF hub).
 - `mgpt/archs/motion_tokenizer.py` — `FSQTokenizer` wrapper; `mgpt/utils/load_checkpoint.py` loads the
   frozen FSQ checkpoint named by `TRAIN.PRETRAINED_VAE`.
-- `mgpt/data/CustomCombined.py` — the multitask datamodule.
+- `mgpt/data/CustomCombined.py` (the `mgpt.data` subpackage) — the multitask datamodule.
 
 ## Configs (`configs/`)
 Loaded by `mgpt/config.py:parse_args`, which globs `configs/*/*.yaml` into namespaces. **Run from this
