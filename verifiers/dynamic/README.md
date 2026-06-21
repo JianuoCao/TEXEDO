@@ -2,7 +2,7 @@
 
 A Transformer reward model that scores the physical plausibility and task
 progress of a generated 36-dim motion. It is one of two verifiers used for
-best-of-N candidate selection in the text-see-do pipeline (the other is the
+best-of-N candidate selection in the TEXEDO pipeline (the other is the
 semantic verifier in `verifiers/semantic/`). This component is self-contained
 (torch / numpy / pandas / sklearn / scipy only) and does **not** import from
 `generator` or `mGPT`.
@@ -94,7 +94,7 @@ Expected asset paths (see `textseedo.paths`):
 
 ```bash
 conda activate mgpt
-cd text-see-do
+cd TEXEDO
 
 python -m verifiers.dynamic.train_verifier \
     --train_csv  /path/to/train_labels.csv \
@@ -150,5 +150,5 @@ This package keeps **training + inference only**:
 ## Smoke check
 
 ```bash
-cd text-see-do && python -c "import sys; sys.path.insert(0,'.'); from verifiers.dynamic import model, dataset; print('ok')"
+cd TEXEDO && python -c "import sys; sys.path.insert(0,'.'); from verifiers.dynamic import model, dataset; print('ok')"
 ```

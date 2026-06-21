@@ -1,6 +1,6 @@
 # Motion Format
 
-This page documents the 36-dim motion representation used throughout text-see-do
+This page documents the 36-dim motion representation used throughout TEXEDO
 (tokenizer, generator, verifiers, pipeline). It mirrors the format documented in the
 public `JianuoCao/TEXEDO` dataset card.
 

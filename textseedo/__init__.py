@@ -1,4 +1,4 @@
-"""Text-See-Do: a reproducible text-to-motion pipeline.
+"""TEXEDO: a reproducible text-to-motion pipeline.
 
 Components
 ----------

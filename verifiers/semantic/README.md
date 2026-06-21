@@ -2,7 +2,7 @@
 
 A BiGRU text/motion matching evaluator that scores how well a generated 36-dim
 motion matches a text caption. It is one of two verifiers used for best-of-N
-candidate selection in the text-see-do pipeline (the other is the dynamic
+candidate selection in the TEXEDO pipeline (the other is the dynamic
 verifier in `verifiers/dynamic/`). Same architecture family as the
 text-to-motion / MotionGPT evaluator (FID / R-Precision / Matching-Score),
 retrained here for the 36-dim Unitree G1 motion format (root pos(3) + root
@@ -82,7 +82,7 @@ text_mot_match/eval/E###.txt                     # periodic pos/neg distance dum
 
 ```bash
 conda activate mgpt
-cd text-see-do
+cd TEXEDO
 
 python verifiers/semantic/train_evaluator.py --step all --gpu 0
 # or one step at a time:
@@ -142,7 +142,7 @@ This package keeps **training + inference only**, per `docs/tasks/CONTRACT.md`:
 ## Smoke check
 
 ```bash
-cd text-see-do && python -c "import sys; sys.path.insert(0,'.'); from verifiers.semantic import models; print('ok')"
+cd TEXEDO && python -c "import sys; sys.path.insert(0,'.'); from verifiers.semantic import models; print('ok')"
 ```
 
 A repo-wide grep for leaked absolute user paths under this directory (per the
@@ -152,5 +152,5 @@ path-cleanup rule in `docs/tasks/CONTRACT.md`) should also return no matches.
 tiny fake GloVe vocab, no checkpoint/downloads needed):
 
 ```bash
-cd text-see-do/verifiers/semantic && python inference.py
+cd TEXEDO/verifiers/semantic && python inference.py
 ```

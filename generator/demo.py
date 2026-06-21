@@ -235,7 +235,10 @@ def demo_ours(task="t2m", num_samples=3, temperature=0.9, top_k=50, top_p=0.95,
     # 2. Build dataset
     datamodule = build_data(cfg)
     datamodule.setup()
-    # 3. Build model
+    # 3. Build model. demo.py only generates motions (it never computes metrics), so we
+    #    skip building the metric modules — this avoids loading the semantic evaluator
+    #    checkpoint that BaseMetrics would otherwise pull in at construction time.
+    os.environ["TSD_SKIP_METRICS"] = "1"
     model = build_model(cfg, datamodule)
     
     # Load checkpoint
@@ -550,7 +553,7 @@ def demo_ours(task="t2m", num_samples=3, temperature=0.9, top_k=50, top_p=0.95,
             print(f"Generated missing outputs: {generated_outputs}")
     
     print(f"\nTo visualize, run:")
-    print(f"  python scripts/visualize_npz.py --input-dir {output_dir} --output-dir {output_dir}")
+    print(f"  python scripts/visualize_csv.py --input-dir {output_dir} --output-dir {output_dir}")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Generate motion samples from text')

@@ -62,6 +62,8 @@ def main() -> None:
     if rc == 0:
         n = len(list(out_dir.glob("*.npy")))
         print(f"[generate] {n} candidate .npy files in {out_dir}")
+        print(f"[generate] render videos:  python scripts/visualize_csv.py "
+              f"--input-dir {out_dir} --output-dir {out_dir}")
         print(f"[generate] next:  python -m pipeline.score --motion-dir {out_dir} "
               f"--caption \"{args.prompt}\" --output {out_dir}/scores.csv")
     raise SystemExit(rc)

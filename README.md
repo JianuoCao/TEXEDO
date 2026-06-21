@@ -1,4 +1,4 @@
-# Text-See-Do
+# TEXEDO
 
 A reproducible **text → motion** pipeline for the Unitree G1 humanoid. A language model turns
 text into discrete motion tokens, an FSQ tokenizer decodes them to 36-dim motion, and two
@@ -32,8 +32,8 @@ verifiers (physical plausibility + text–motion match) rank candidates for best
 
 ## 1. Install
 ```bash
-git clone <this-repo> text-see-do && cd text-see-do
-conda env create -f environment.yml && conda activate textseedo   # or: pip install -r requirements.txt
+git clone <this-repo> TEXEDO && cd TEXEDO
+conda env create -f environment.yml && conda activate TEXEDO   # or: pip install -r requirements.txt
 pip install -e .
 ```
 Python 3.10, PyTorch 2.5.1, CUDA 12.4.
@@ -108,8 +108,8 @@ python -m pipeline.score --motion-dir candidates/ \
 python -m pipeline.select_best_of_n --scores scores.csv \
     --motion-dir candidates/ --copy-best-to best/
 
-# (d) visualize the winner (matplotlib summary PNG)
-python scripts/visualize_npz.py --input-dir best/ --output-dir viz/
+# (d) render the winner to a MuJoCo MP4 video
+python scripts/visualize_csv.py --input-dir best/ --output-dir viz/
 ```
 
 Just want generation, no verifiers? Run the generator directly:

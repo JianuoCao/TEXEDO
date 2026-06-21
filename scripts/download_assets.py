@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Download all text-see-do assets (dataset + checkpoints) from the Hugging Face Hub.
+"""Download all TEXEDO assets (dataset + checkpoints) from the Hugging Face Hub.
 
 Reads the manifest in ``configs/paths.yaml`` and fetches:
   - the TEXEDO dataset (``snapshot_download``) into ``${TSD_DATA}/texedo``

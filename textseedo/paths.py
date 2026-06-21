@@ -1,4 +1,4 @@
-"""Central path resolution for the text-see-do repo.
+"""Central path resolution for the TEXEDO repo.
 
 Every script and config resolves large-asset and dataset locations through this module
 (or the equivalent OmegaConf env interpolation ``${oc.env:TSD_ASSETS}`` /

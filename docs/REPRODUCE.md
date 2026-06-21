@@ -73,7 +73,7 @@ python verifiers/dynamic/train_verifier.py \
 python -m pipeline.generate --prompt "a person waves" --num-samples 8 --out-dir candidates/
 python -m pipeline.score    --motion-dir candidates/ --caption "a person waves" --output scores.csv
 python -m pipeline.select_best_of_n --scores scores.csv --motion-dir candidates/ --copy-best-to best/
-python scripts/visualize_npz.py --input-dir best/ --output-dir viz/
+python scripts/visualize_csv.py --input-dir best/ --output-dir viz/
 ```
 
 ## Smoke (no GPU / before assets are uploaded)

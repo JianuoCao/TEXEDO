@@ -69,12 +69,14 @@ class BaseModel(LightningModule):
 
     def preprocess_state_dict(self, state_dict):
         new_state_dict = OrderedDict()
-        
-        metric_state_dict = self.metrics.state_dict()
-        loss_state_dict = self._losses.state_dict()
 
-        for k, v in metric_state_dict.items():
-            new_state_dict['metrics.' + k] = v
+        # self.metrics is None when metric building is skipped (generation/inference);
+        # the saved checkpoint already excludes metric keys, so nothing to re-inject.
+        if self.metrics is not None:
+            for k, v in self.metrics.state_dict().items():
+                new_state_dict['metrics.' + k] = v
+
+        loss_state_dict = self._losses.state_dict()
 
         for k, v in loss_state_dict.items():
             new_state_dict['_losses.' + k] = v
@@ -139,6 +141,12 @@ class BaseModel(LightningModule):
         return {'optimizer': optimizer, 'lr_scheduler': lr_scheduler}
 
     def configure_metrics(self):
+        # Generation/inference (e.g. demo.py) sets TSD_SKIP_METRICS=1 because it never
+        # computes metrics; this avoids loading the semantic evaluator checkpoint, which
+        # is only needed for test/val. Training and test.py leave it unset.
+        if os.environ.get("TSD_SKIP_METRICS") == "1":
+            self.metrics = None
+            return
         self.metrics = BaseMetrics(datamodule=self.datamodule, **self.hparams)
 
     def save_npy(self, outputs):

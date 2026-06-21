@@ -254,7 +254,7 @@ class MotionDataset(Dataset):
     def __len__(self) -> int:
         return len(self.samples)
 
-    # Joint index mapping from NPZ order to CSV order (from visualize_npz.py)
+    # Joint index mapping from NPZ order to CSV order (from visualize_csv.py)
     _NPZ_TO_CSV = [0, 3, 6, 9, 13, 17, 1, 4, 7, 10, 14, 18,
                    2, 5, 8, 11, 15, 19, 21, 23, 25, 27,
                    12, 16, 20, 22, 24, 26, 28]

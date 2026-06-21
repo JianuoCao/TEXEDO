@@ -3,7 +3,7 @@
 Finite Scalar Quantization (FSQ) tokenizer that discretizes 36-dim Unitree G1
 motion (`root_pos(3) + root_quat_wxyz(4) + joint_pos(29)`, see
 `textseedo.motion_format`) into a single stream of discrete tokens. Used as
-Stage-1 of the text-see-do pipeline; the generator (`generator/`) is trained
+Stage-1 of the TEXEDO pipeline; the generator (`generator/`) is trained
 on top of the resulting token sequences.
 
 FSQ reference: Mentzer et al., *"Finite Scalar Quantization: VQ-VAE Made
@@ -49,7 +49,7 @@ relative stats path resolves.
 ## Train
 
 ```bash
-cd text-see-do
+cd TEXEDO
 python tokenizer/fsq_train.py --config tokenizer/configs/fsq_combined.yaml
 ```
 

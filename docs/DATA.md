@@ -72,7 +72,7 @@ the repo's data root if `TSD_DATA` is unset.
 `CustomCombined` layout the generator and verifiers expect:
 
 ```bash
-cd text-see-do
+cd TEXEDO
 python generator/scripts/prepare_dataset.py
 ```
 

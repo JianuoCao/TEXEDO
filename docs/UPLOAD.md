@@ -9,7 +9,7 @@ uploading is just packaging `assets/` and pushing it.
 ```bash
 pip install -U huggingface_hub
 huggingface-cli login                                   # token with `write` access
-huggingface-cli repo create text-see-do-checkpoints --type model
+huggingface-cli repo create TEXEDO-checkpoints --type model
 ```
 
 ## 1. Build the two tarballs the manifest expects
@@ -40,15 +40,15 @@ The resulting `upload/` mirrors each manifest entry's `remote` path exactly.
 ## 3. Upload
 ```bash
 # resumable + parallel (best for the 3.4 GB generator ckpt)
-hf upload-large-folder <you>/text-see-do-checkpoints upload --repo-type=model
+hf upload-large-folder <you>/TEXEDO-checkpoints upload --repo-type=model
 ```
-Or file-by-file: `huggingface-cli upload <you>/text-see-do-checkpoints <local> <remote>`.
+Or file-by-file: `huggingface-cli upload <you>/TEXEDO-checkpoints <local> <remote>`.
 
 ## 4. Point the manifest at your repo
 Edit `configs/paths.yaml`:
 ```yaml
 checkpoints:
-  hf_repo: <you>/text-see-do-checkpoints   # was: TODO_USER_MODEL_REPO
+  hf_repo: <you>/TEXEDO-checkpoints   # was: TODO_USER_MODEL_REPO
 ```
 
 ## 5. Verify

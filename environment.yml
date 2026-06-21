@@ -1,4 +1,4 @@
-name: textseedo
+name: TEXEDO
 channels:
   - pytorch
   - nvidia
