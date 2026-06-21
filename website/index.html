@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TEXEDO 🤵: Test-Time Scaling for Controller-aware Humanoid Motion Generation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&amp;family=Hanken+Grotesk:wght@400;500;600;700&amp;family=Roboto+Mono:wght@300;400;500;600;700&amp;family=Spline+Sans+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F6F2EA;
+    --paper-2:#FBF8F2;
+    --ink:#181410;
+    --ink-soft:#4a423a;
+    --muted:#8a7f72;
+    --line:#e3dbcd;
+    --accent:#C0532A;
+    --accent-soft:#e9a778;
+    --good:#3f6b4a;
+    --serif:'Playfair Display',Georgia,serif;
+    --sans:'Hanken Grotesk',sans-serif;
+    --mono:'Spline Sans Mono',monospace;
+    --maxw:1080px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth;background:var(--paper)}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--sans);
+    font-size:17px;
+    line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  /* subtle grain + warm glow atmosphere */
+  body::before{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+    background:
+      radial-gradient(60% 50% at 75% -5%, rgba(192,83,42,.10), transparent 70%),
+      radial-gradient(55% 45% at 12% 8%, rgba(63,107,74,.06), transparent 70%);
+  }
+  body::after{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:1;opacity:.035;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  .wrap{position:relative;z-index:2;max-width:var(--maxw);margin:0 auto;padding:0 28px}
+
+  /* ---------- NAV ---------- */
+  nav{
+    position:fixed;top:0;left:0;right:0;z-index:50;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:14px 28px;
+    backdrop-filter:blur(10px);
+    background:rgba(246,242,234,.72);
+    border-bottom:1px solid transparent;
+    transition:border-color .3s, background .3s;
+  }
+  nav.scrolled{border-color:var(--line)}
+  nav .brand{font-family:var(--serif);font-weight:600;font-size:20px;letter-spacing:.02em;color:var(--accent);text-transform:uppercase}
+  nav .brand .emoji{font-family:var(--sans);font-size:.95em;margin-left:7px;vertical-align:.02em}
+  nav .links{display:flex;gap:26px;font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;text-transform:uppercase}
+  nav .links a{color:var(--ink-soft);text-decoration:none;transition:color .2s;position:relative}
+  nav .links a:hover{color:var(--accent)}
+  @media(max-width:640px){nav .links{display:none}}
+
+  /* ---------- HERO ---------- */
+  header.wrap{padding:100px 28px 70px;text-align:center}
+  .eyebrow{
+    font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;
+    color:var(--accent);margin-bottom:26px;
+  }
+  h1.title{
+    font-family:'Roboto Mono',monospace;font-weight:700;
+    font-size:clamp(1.1rem,2.4vw,1.9rem);
+    line-height:1.3;letter-spacing:-.01em;
+    margin:0 auto 8px;max-width:none;
+  }
+  h1.title .lead{
+    display:inline-flex;align-items:center;gap:.22em;margin-right:.4em;
+    color:var(--accent);font-size:1.15em;font-weight:700;letter-spacing:.02em;
+    text-transform:uppercase;
+  }
+  h1.title .lead .emoji{font-family:var(--sans);font-size:.78em;line-height:1;transform:translateY(.02em)}
+  .subtitle{
+    font-family:var(--serif);font-style:italic;font-weight:400;
+    font-size:clamp(1.05rem,2.2vw,1.4rem);color:var(--ink-soft);
+    max-width:30ch;margin:0 auto;
+  }
+  /* ---------- TEASER VIDEO ---------- */
+  .teaser{margin:64px auto 0;max-width:var(--maxw)}
+  .vid{
+    position:relative;width:100%;aspect-ratio:16/9;border-radius:14px;overflow:hidden;
+    background:linear-gradient(135deg,#221c16,#3a3026);
+    border:1px solid var(--line);box-shadow:0 30px 60px -28px rgba(24,20,16,.55);
+  }
+  .vid video{width:100%;height:100%;object-fit:cover;display:block}
+  .vid iframe{width:100%;height:100%;border:0;display:block}
+  .vid .ph{
+    position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:14px;color:rgba(255,255,255,.78);text-align:center;padding:20px;
+  }
+  .vid .ph .play{
+    width:62px;height:62px;border-radius:50%;border:1.5px solid rgba(255,255,255,.6);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .vid .ph .play::after{content:"";border-left:16px solid rgba(255,255,255,.85);border-top:10px solid transparent;border-bottom:10px solid transparent;margin-left:4px}
+  .vid .ph .lbl{font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase}
+  .vid .ph .hint{font-family:var(--mono);font-size:11px;color:rgba(255,255,255,.4)}
+  .teaser-progress{
+    position:absolute;left:18px;right:18px;bottom:16px;z-index:4;
+    opacity:0;transform:translateY(8px);
+    transition:opacity .2s,transform .2s;
+    pointer-events:none;
+  }
+  .teaser .vid:hover .teaser-progress,
+  .teaser .vid.scrubbing .teaser-progress{
+    opacity:1;transform:none;pointer-events:auto;
+  }
+  .teaser-progress input{
+    width:100%;height:18px;margin:0;display:block;
+    appearance:none;background:transparent;cursor:pointer;
+  }
+  .teaser-progress input::-webkit-slider-runnable-track{
+    height:4px;border-radius:999px;
+    background:linear-gradient(90deg,var(--accent) var(--progress,0%),rgba(255,255,255,.42) var(--progress,0%));
+  }
+  .teaser-progress input::-webkit-slider-thumb{
+    appearance:none;width:12px;height:12px;border-radius:50%;
+    background:#fff;border:2px solid var(--accent);
+    margin-top:-4px;box-shadow:0 2px 8px rgba(0,0,0,.22);
+  }
+  .teaser-progress input::-moz-range-track{
+    height:4px;border-radius:999px;background:rgba(255,255,255,.42);
+  }
+  .teaser-progress input::-moz-range-progress{
+    height:4px;border-radius:999px;background:var(--accent);
+  }
+  .teaser-progress input::-moz-range-thumb{
+    width:12px;height:12px;border-radius:50%;
+    background:#fff;border:2px solid var(--accent);
+  }
+
+  /* ---------- SECTIONS ---------- */
+  section{position:relative}
+  section.wrap{padding:22px 28px 76px}
+  .sec-tag{
+    width:max-content;max-width:100%;
+    font-family:'Roboto Mono',monospace;font-weight:700;font-size:14px;letter-spacing:.15em;text-transform:uppercase;
+    color:var(--accent);margin-bottom:24px;display:flex;align-items:center;gap:14px;
+    padding:10px 16px 10px 12px;border:1px solid rgba(192,83,42,.32);
+    border-radius:999px;background:linear-gradient(90deg,rgba(192,83,42,.12),rgba(251,248,242,.76));
+    box-shadow:0 10px 26px -24px rgba(192,83,42,.7);
+  }
+  .sec-tag::before{
+    content:attr(data-no);
+    min-width:34px;height:34px;border-radius:50%;
+    display:inline-flex;align-items:center;justify-content:center;
+    background:var(--accent);color:#fff;font-size:12px;letter-spacing:0;font-weight:600;
+  }
+  .sec-tag::after{
+    content:"";width:42px;height:1px;background:linear-gradient(90deg,var(--accent),transparent);
+  }
+  @media(max-width:560px){
+    section.wrap{padding:72px 28px 64px}
+    .sec-tag{width:100%;justify-content:flex-start;letter-spacing:.1em;font-size:12px;gap:12px}
+    .sec-tag::after{flex:1}
+  }
+  h2{
+    font-family:'Roboto Mono',monospace;font-weight:700;font-size:clamp(1rem,2vw,1.4rem);
+    line-height:1.2;letter-spacing:-.02em;margin-bottom:24px;
+  }
+  .abstract p{font-size:18.5px;line-height:1.75;color:var(--ink-soft)}
+  .abstract p strong{color:var(--ink);font-weight:600}
+
+  /* ---------- METHOD PIPELINE ---------- */
+  .pipe{display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px;margin-top:18px}
+  @media(max-width:760px){.pipe{grid-template-columns:1fr}}
+  .stage{
+    background:var(--paper-2);border:1px solid var(--line);border-radius:14px;
+    padding:26px 24px;position:relative;overflow:hidden;
+    transition:transform .3s, box-shadow .3s, border-color .3s;
+  }
+  .stage:hover{transform:translateY(-4px);box-shadow:0 18px 40px -26px rgba(24,20,16,.4);border-color:var(--accent-soft)}
+  .stage .num{font-family:var(--mono);font-size:12px;color:var(--accent);letter-spacing:.12em}
+  .stage h3{font-family:var(--serif);font-weight:600;font-size:1.7rem;margin:8px 0 4px;letter-spacing:.02em}
+  .stage h3 small{font-family:var(--sans);font-size:.62em;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;display:block;margin-top:4px}
+  .stage p{font-size:15px;color:var(--ink-soft);line-height:1.6;margin-top:10px}
+  .stage .glyph{position:absolute;right:-10px;bottom:-18px;font-family:var(--serif);font-size:7rem;color:var(--ink);opacity:.04;font-weight:600}
+
+  .formula{
+    margin-top:30px;background:var(--paper-2);border:1px solid var(--line);border-left:3px solid var(--accent);
+    border-radius:12px;padding:22px 26px;
+  }
+  .formula .cap{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:10px}
+  .formula code{font-family:var(--mono);font-size:14.5px;color:var(--ink);line-height:1.9;display:block}
+  .formula .note{font-size:14px;color:var(--ink-soft);margin-top:12px;line-height:1.6}
+
+  /* ---------- STATS ---------- */
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:14px}
+  @media(max-width:760px){.stats{grid-template-columns:repeat(2,1fr)}}
+  .stat{background:var(--paper-2);border:1px solid var(--line);border-radius:14px;padding:24px 22px;text-align:left}
+  .stat .big{font-family:var(--serif);font-weight:600;font-size:2.5rem;line-height:1;letter-spacing:-.02em}
+  .stat .big .arr{color:var(--accent);font-size:.7em}
+  .stat .lbl{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:12px}
+  .stat .from{font-size:13px;color:var(--ink-soft);margin-top:6px}
+
+  /* ---------- TABLE ---------- */
+  .tbl-wrap{margin-top:14px;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--paper-2)}
+  table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:13.5px;line-height:1.25}
+  caption{text-align:left;padding:12px 16px 8px;font-size:11.5px;color:var(--ink);font-style:normal;font-family:'Roboto Mono',monospace;letter-spacing:.035em;line-height:1.45}
+  th,td{padding:8px 12px;text-align:center;border-bottom:1px solid var(--line);vertical-align:middle}
+  th:first-child,td:first-child{text-align:left}
+  table:not(.table3) th:first-child{width:30%}
+  thead th{font-family:var(--mono);font-size:10.8px;letter-spacing:.035em;text-transform:uppercase;color:var(--muted);font-weight:600;line-height:1.25}
+  tbody td:first-child{font-weight:600}
+  tbody tr:last-child td{border-bottom:none}
+  tr.ours{background:rgba(192,83,42,.07)}
+  tr.ours td:first-child{color:var(--accent)}
+  tr.ours td:not(:first-child){text-decoration:underline;text-underline-offset:3px}
+  td.best{font-weight:700}
+  .table3 caption{padding-bottom:6px}
+  .table3 th,.table3 td{padding:7px 10px}
+  .table3 thead th:nth-child(2),.table3 td.setting{text-align:left}
+  .table3 td.setting{font-weight:700;color:var(--ink)}
+  .table3 td.method{font-weight:600;text-align:left}
+  .table3 td.method.base{color:var(--muted)}
+  .table3 td.method.ours{color:var(--accent)}
+  .table3 tbody tr.group-start td:not(.setting){border-bottom:none}
+  .table3 tbody tr.group-end td{border-bottom:1px solid var(--line)}
+  .table3 tbody tr:last-child td{border-bottom:none}
+  .table3 tr.ours{background:transparent}
+  .table3 tr.ours td:not(:first-child){text-decoration:none}
+  .tbl-note{font-size:13.5px;color:var(--muted);margin-top:14px;line-height:1.6}
+
+  /* ---------- VIDEO CAROUSEL ---------- */
+  .video-carousel{margin-top:18px}
+  .carousel-top{
+    display:flex;align-items:center;justify-content:flex-end;gap:14px;
+    margin-bottom:16px;
+  }
+  .carousel-controls{display:flex;align-items:center;gap:10px}
+  .carousel-btn{
+    width:42px;height:42px;border-radius:50%;
+    border:1px solid var(--line);background:var(--paper-2);color:var(--ink);
+    display:inline-flex;align-items:center;justify-content:center;
+    cursor:pointer;transition:transform .2s, background .2s, color .2s, border-color .2s, box-shadow .2s;
+  }
+  .carousel-btn svg{width:18px;height:18px}
+  .carousel-btn:hover{
+    transform:translateY(-2px);
+    background:var(--accent);border-color:var(--accent);color:#fff;
+    box-shadow:0 10px 24px -18px rgba(24,20,16,.55);
+  }
+  .carousel-btn:disabled{opacity:.45;cursor:default;transform:none;box-shadow:none}
+  .carousel-btn:disabled:hover{background:var(--paper-2);border-color:var(--line);color:var(--ink)}
+  .carousel-window{overflow:hidden}
+  .carousel-track{
+    display:grid;grid-template-columns:1fr 1fr;gap:20px;
+    transition:transform .34s cubic-bezier(.2,.7,.2,1),opacity .34s cubic-bezier(.2,.7,.2,1);
+  }
+  .carousel-track.slide-out-left{transform:translateX(-34px);opacity:0}
+  .carousel-track.slide-out-right{transform:translateX(34px);opacity:0}
+  .carousel-track.slide-in-left{animation:carouselInLeft .34s cubic-bezier(.2,.7,.2,1)}
+  .carousel-track.slide-in-right{animation:carouselInRight .34s cubic-bezier(.2,.7,.2,1)}
+  @keyframes carouselInLeft{from{transform:translateX(-34px);opacity:0}to{transform:none;opacity:1}}
+  @keyframes carouselInRight{from{transform:translateX(34px);opacity:0}to{transform:none;opacity:1}}
+  .gcard{min-width:0}
+  .gcard .vid{aspect-ratio:16/9;border-radius:10px;box-shadow:none}
+  .gcard .prompt{
+    margin-top:12px;font-family:'Roboto Mono',monospace;font-style:normal;font-size:.88rem;color:var(--ink-soft);
+    text-shadow:none;box-shadow:none;
+  }
+  .gcard .prompt:empty{display:none}
+  .gcard .prompt .q{font-family:var(--mono);font-style:normal;font-size:11px;color:var(--accent);letter-spacing:.08em}
+  @media(prefers-reduced-motion:reduce){
+    .carousel-track{transition:none}
+    .carousel-track.slide-in-left,.carousel-track.slide-in-right{animation:none}
+  }
+  @media(max-width:680px){
+    .carousel-top{margin-bottom:12px}
+    .carousel-track{gap:10px}
+    .carousel-btn{width:36px;height:36px}
+    .gcard .vid{border-radius:8px}
+  }
+
+  /* ---------- REVEAL ---------- */
+  .reveal{opacity:0;transform:translateY(26px);transition:opacity .7s cubic-bezier(.2,.7,.2,1),transform .7s cubic-bezier(.2,.7,.2,1)}
+  .reveal.in{opacity:1;transform:none}
+  .d1{transition-delay:.08s}.d2{transition-delay:.16s}.d3{transition-delay:.24s}.d4{transition-delay:.32s}
+</style>
+</head>
+<body>
+
+<nav id="nav">
+  <div class="brand">TEXEDO<span class="emoji" aria-hidden="true">🤵</span></div>
+  <div class="links">
+    <a href="#abstract">Abstract</a>
+    <!-- <a href="#method">Method</a> -->
+    <a href="#results">Results</a>
+    <a href="#videos">Real Robot</a>
+  </div>
+</nav>
+
+<header class="wrap">
+  <h1 class="title reveal d1">
+    <span class="lead">TEXEDO<span class="emoji" aria-hidden="true">🤵:</span></span>
+    Test-Time Scaling for Controller-aware
+    Language-conditioned Humanoid Motion Generation
+  </h1>
+
+  <div class="teaser reveal d4">
+    <div class="vid">
+      <video poster="" autoplay muted loop playsinline preload="metadata">
+        <source src="videos/2635_video.mp4" type="video/mp4">
+      </video>
+      <div class="ph">
+        <div class="play"></div>
+        <div class="lbl">Overview Video</div>
+        <div class="hint">videos/2635_video.mp4</div>
+      </div>
+      <div class="teaser-progress" aria-label="Overview video progress">
+        <input id="teaserProgress" type="range" min="0" max="100" value="0" step="0.1" aria-label="Seek overview video">
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<!-- ABSTRACT -->
+<section id="abstract" class="wrap abstract reveal">
+  <div class="sec-tag" data-no="01">Abstract</div>
+  <h2>Semantically plausible isn't always executable.</h2>
+  <p>
+Text-conditioned motion generation has become a promising interface for programming humanoid robots, but current generators are often trained on human motion datasets retargeted to robot morphology. While such data provides rich semantic and kinematic priors, it does not capture the nuances of the whole-body tracking controller, including balance, contact, actuation limits, and controller-specific failure modes.
+Therefore, generated motions can be semantically plausible yet difficult or impossible for the robot to execute.  
+We propose <strong style="color:var(--accent)">TEXEDO</strong>, a test-time scaling framework for humanoid motion generation that improves motion quality without requiring a stronger underlying generator.
+Given a text prompt, our method samples multiple motions from the pre-trained text-conditioned generator and selects the best executable and task-aligned motion. 
+The reward model combines a dynamic feasibility verifier, distilled from whole-body tracking rollouts to predict physical executability, with a semantic alignment verifier that measures text-motion alignment in a learned co-embedding space.
+Our pipeline treats dynamic feasibility as a hard constraint and semantic alignment as the selection objective within the feasible set.
+Across large-scale simulation studies and real-world deployment on a Unitree G1, we show that our test-time scaling strategy consistently improves both tracking fidelity and text alignment, demonstrating that grounded verification is an effective path toward deployable language-guided humanoid motion generation.
+  </p>
+</section>
+
+<!-- METHOD -->
+<!-- <section id="method" class="wrap reveal">
+  <div class="sec-tag" data-no="02">Method · Text → See → Do</div>
+  <h2>One frozen generator, two grounded verifiers, one deployable motion.</h2>
+
+  <div class="pipe">
+    <div class="stage reveal">
+      <div class="num">STAGE 01</div>
+      <h3>Text<small>Sample candidates</small></h3>
+      <p>A language-conditioned generator (FSQ-GPT) samples N candidate whole-body trajectories from the prompt. The generator is treated as a black box and stays frozen.</p>
+      <div class="glyph">T</div>
+    </div>
+    <div class="stage reveal d1">
+      <div class="num">STAGE 02</div>
+      <h3>See<small>Score each candidate</small></h3>
+      <p>Two scalars per candidate: a dynamic score R<sub>dyn</sub> predicting controller executability, distilled from tracker rollouts, and a semantic score R<sub>text</sub> measuring text–motion alignment.</p>
+      <div class="glyph">S</div>
+    </div>
+    <div class="stage reveal d2">
+      <div class="num">STAGE 03</div>
+      <h3>Do<small>Filter, then rerank</small></h3>
+      <p>An asymmetric rule: first discard dynamically infeasible candidates (hard constraint), then pick the most semantically aligned survivor. One reference goes to the robot.</p>
+      <div class="glyph">D</div>
+    </div>
+  </div>
+  <div class="reveal" style="margin-top:36px;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--paper-2);">
+    <object data="fig/teaser.pdf" type="application/pdf" width="100%" style="display:block;min-height:560px;border:none;">
+      <p style="padding:24px;font-family:var(--mono);font-size:13px;color:var(--muted);">PDF preview unavailable — <a href="fig/teaser.pdf" style="color:var(--accent);">open teaser.pdf</a></p>
+    </object>
+  </div> -->
+
+<!-- </section> --> 
+
+<!-- RESULTS -->
+<section id="results" class="wrap reveal">
+  <div class="sec-tag" data-no="03">Results</div>
+
+  <div class="tbl-wrap reveal" style="margin-top:18px">
+    <table>
+      <caption>Table 1 — TEXEDO balances the complementary strengths of R<sub>dyn</sub> and R<sub>text</sub>.</caption>
+      <thead>
+        <tr><th>Strategy</th><th>VLM-Judge ↑</th><th>Succ ↑</th><th>E<sub>mpjpe</sub> ↓</th><th>E<sub>acc</sub> ↓</th><th>E<sub>vel</sub> ↓</th><th>Q* ↑</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Base (N=1)</td><td>5.722</td><td>0.873</td><td>44.34</td><td>6.09</td><td>11.82</td><td>0.829</td></tr>
+        <tr><td>R<sub>dyn</sub>-only (N=32)</td><td>4.924</td><td class="best">0.990</td><td class="best">38.15</td><td class="best">3.30</td><td class="best">5.91</td><td class="best">0.945</td></tr>
+        <tr><td>R<sub>text</sub>-only (N=32)</td><td class="best">6.110</td><td>0.885</td><td>42.97</td><td>4.90</td><td>10.03</td><td>0.847</td></tr>
+        <tr class="ours"><td>TEXEDO (N=32)</td><td>6.054</td><td>0.984</td><td>39.09</td><td>4.26</td><td>7.78</td><td>0.926</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <!-- <p class="tbl-note reveal">Optimizing feasibility alone is <em>detrimental</em> to semantics (R<sub>dyn</sub>-only drops alignment to 4.924, below Base). TEXEDO resolves the tension by composition: execution close to R<sub>dyn</sub>-only while largely preserving R<sub>text</sub>-only's alignment.</p> -->
+
+  <div class="tbl-wrap reveal" style="margin-top:24px">
+    <table>
+      <caption>Table 2 — Zero-shot transfer to Kimodo. TEXEDO, trained only on FSQ-GPT rollouts, improves both VLM-Judge and physical execution metrics when applied zero-shot to the unseen Kimodo generator.</caption>
+      <thead>
+        <tr><th>Method</th><th>VLM-Judge ↑</th><th>Succ ↑</th><th>E<sub>mpjpe</sub> ↓</th><th>E<sub>acc</sub> ↓</th><th>E<sub>vel</sub> ↓</th><th>Q* ↑</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Kimodo (Base, N=1)</td><td>4.823</td><td>0.937</td><td>38.62</td><td>1.84</td><td>5.33</td><td>0.918</td></tr>
+        <tr><td>Kimodo + R<sub>dyn</sub>-only (N=32)</td><td>5.020</td><td class="best">0.955</td><td class="best">35.47</td><td class="best">1.42</td><td class="best">4.28</td><td class="best">0.937</td></tr>
+        <tr><td>Kimodo + R<sub>text</sub>-only (N=32)</td><td class="best">5.717</td><td>0.942</td><td>38.02</td><td>1.87</td><td>5.43</td><td>0.919</td></tr>
+        <tr class="ours"><td>Kimodo + TEXEDO (N=32)</td><td>5.381</td><td>0.954</td><td>37.49</td><td>1.70</td><td>4.97</td><td>0.935</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <!-- <p class="tbl-note reveal">Verifiers operate on decoded robot motions, not generator internals — so they transfer <strong>zero-shot</strong> to the unseen Kimodo generator, improving both axes without any retraining.</p> -->
+
+  <div class="tbl-wrap reveal" style="margin-top:24px">
+    <table class="table3">
+      <colgroup>
+        <col style="width:9%">
+        <col style="width:18%">
+        <col style="width:13%">
+        <col style="width:12%">
+        <col style="width:12%">
+        <col style="width:12%">
+        <col style="width:12%">
+        <col style="width:12%">
+      </colgroup>
+      <caption>Table 3 — Out-of-distribution generalization on BONES-SEED prompts. TEXEDO improves over the base generator on both ID and OOD splits along both axes.</caption>
+      <thead>
+        <tr>
+          <th>Setting</th>
+          <th>Method</th>
+          <th>VLM-Judge ↑</th>
+          <th>Succ ↑</th>
+          <th>E<sub>mpjpe</sub> ↓</th>
+          <th>E<sub>acc</sub> ↓</th>
+          <th>E<sub>vel</sub> ↓</th>
+          <th>Q* ↑</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="group-start">
+          <td class="setting" rowspan="2">ID</td>
+          <td class="method base">Base (N=1)</td>
+          <td>5.722</td><td>0.873</td><td>44.34</td><td>6.09</td><td>11.82</td><td>0.829</td>
+        </tr>
+        <tr class="ours group-end">
+          <td class="method ours">TEXEDO (N=32)</td>
+          <td class="best">6.054</td><td class="best">0.984</td><td class="best">39.09</td><td class="best">4.26</td><td class="best">7.78</td><td class="best">0.926</td>
+        </tr>
+        <tr class="group-start">
+          <td class="setting" rowspan="2">OOD</td>
+          <td class="method base">Base (N=1)</td>
+          <td>4.116</td><td>0.860</td><td>36.22</td><td>8.36</td><td>15.71</td><td>0.804</td>
+        </tr>
+        <tr class="ours group-end">
+          <td class="method ours">TEXEDO (N=32)</td>
+          <td class="best">4.401</td><td class="best">0.980</td><td class="best">26.64</td><td class="best">3.65</td><td class="best">3.88</td><td class="best">0.942</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- VIDEOS -->
+<section id="videos" class="wrap reveal">
+  <div class="sec-tag" data-no="04">Real-Robot Deployment</div>
+  <h2>Selected motions, executed on the Unitree G1.</h2>
+
+  <div class="video-carousel" aria-label="Real robot video carousel">
+    <div class="carousel-top">
+      <div class="carousel-controls" aria-label="Video carousel controls">
+        <button class="carousel-btn" type="button" id="carouselPrev" aria-label="Previous videos">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <button class="carousel-btn" type="button" id="carouselNext" aria-label="Next videos">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="carousel-window">
+      <div class="carousel-track" id="videoCarouselTrack"></div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<script>
+  // nav border on scroll
+  const nav=document.getElementById('nav');
+  addEventListener('scroll',()=>nav.classList.toggle('scrolled',scrollY>20));
+
+  // scroll reveal
+  const io=new IntersectionObserver((es)=>{
+    es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})
+  },{threshold:.12});
+  document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+  // reveal hero immediately
+  document.querySelectorAll('header .reveal').forEach((el,i)=>setTimeout(()=>el.classList.add('in'),80*i));
+
+  function wireVideoPlaceholder(v){
+    const hidePlaceholder=()=>{
+      const ph=v.parentElement.querySelector('.ph'); if(ph) ph.style.display='none';
+    };
+    v.addEventListener('loadeddata',hidePlaceholder,{once:true});
+    v.addEventListener('canplay',hidePlaceholder,{once:true});
+    if(v.readyState>=2) hidePlaceholder();
+    v.addEventListener('error',()=>{}); // missing file → keep placeholder
+  }
+
+  // hide the placeholder once a real video actually loads
+  document.querySelectorAll('.vid video').forEach(wireVideoPlaceholder);
+
+  const teaserVideo=document.querySelector('.teaser video');
+  const teaserProgress=document.getElementById('teaserProgress');
+  if(teaserVideo&&teaserProgress){
+    const teaserBox=teaserVideo.closest('.vid');
+    let scrubbing=false;
+    const playTeaser=()=>{
+      teaserVideo.muted=true;
+      teaserVideo.playsInline=true;
+      teaserVideo.play().catch(()=>{});
+    };
+    const setProgress=(value)=>{
+      teaserProgress.value=value;
+      teaserProgress.style.setProperty('--progress',`${value}%`);
+    };
+    const syncProgress=()=>{
+      if(scrubbing||!Number.isFinite(teaserVideo.duration)||teaserVideo.duration<=0) return;
+      setProgress((teaserVideo.currentTime/teaserVideo.duration)*100);
+    };
+    const seek=()=>{
+      if(!Number.isFinite(teaserVideo.duration)||teaserVideo.duration<=0) return;
+      teaserVideo.currentTime=(Number(teaserProgress.value)/100)*teaserVideo.duration;
+      teaserVideo.play().catch(()=>{});
+    };
+    teaserVideo.addEventListener('timeupdate',syncProgress);
+    teaserVideo.addEventListener('loadedmetadata',()=>{
+      syncProgress();
+      playTeaser();
+    });
+    teaserVideo.addEventListener('canplay',playTeaser,{once:true});
+    teaserVideo.addEventListener('durationchange',syncProgress);
+    document.addEventListener('visibilitychange',()=>{
+      if(!document.hidden) playTeaser();
+    });
+    teaserProgress.addEventListener('pointerdown',()=>{
+      scrubbing=true;
+      teaserBox?.classList.add('scrubbing');
+    });
+    teaserProgress.addEventListener('input',()=>{
+      teaserProgress.style.setProperty('--progress',`${teaserProgress.value}%`);
+      seek();
+    });
+    addEventListener('pointerup',()=>{
+      if(!scrubbing) return;
+      scrubbing=false;
+      teaserBox?.classList.remove('scrubbing');
+      seek();
+    });
+    syncProgress();
+    playTeaser();
+  }
+
+  const carouselVideos=[
+    {src:'videos/dance.mp4',prompt:'prompt：A person dances forward with enthusiasm.'},
+    {src:'videos/dance_and_walk.mp4',prompt:'prompt：A person throws a right jab and does a happy dance.'},
+    {src:'videos/walk_backward2.mp4',prompt:'prompt：A person stumbles backward slowly.'},
+    {src:'videos/kneel_up.mp4',prompt:'prompt：A person rises from one knee and strides forward.'},
+    {src:'videos/point.mp4',prompt:'prompt：A person points straight ahead and walks forward.'},
+    {src:'videos/walk_forward.mp4',prompt:'prompt：A person walks forward naturally.'},
+    {src:'videos/strafe.mp4',prompt:'prompt：A robot moves left cautiously.'},
+    {src:'videos/walk_backward.mp4',prompt:'prompt：A person walks backward steadily.'},
+  ];
+  let carouselStartIndex=0;
+  let carouselAnimating=false;
+
+  function setCarouselButtons(disabled){
+    document.getElementById('carouselPrev').disabled=disabled;
+    document.getElementById('carouselNext').disabled=disabled;
+  }
+
+  function renderCarousel(enterDirection=''){
+    const track=document.getElementById('videoCarouselTrack');
+    if(!track) return;
+
+    const nextIndex=(carouselStartIndex+1)%carouselVideos.length;
+    const visible=[carouselStartIndex,nextIndex];
+    track.className='carousel-track';
+    track.innerHTML=visible.map((idx)=>{
+      const item=carouselVideos[idx];
+      const prompt=item.prompt
+        ? `<div class="prompt">${item.prompt}</div>`
+        : '';
+      return `
+        <div class="gcard" data-video-index="${idx+1}">
+          <div class="vid">
+            <video poster="" autoplay muted loop playsinline preload="metadata">
+              <source src="${item.src}" type="video/mp4">
+            </video>
+            <div class="ph"><div class="play"></div><div class="hint">${item.src}</div></div>
+          </div>
+          ${prompt}
+        </div>`;
+    }).join('');
+    track.querySelectorAll('video').forEach(v=>{
+      wireVideoPlaceholder(v);
+      v.play().catch(()=>{});
+    });
+    if(enterDirection){
+      track.classList.add(enterDirection==='next'?'slide-in-right':'slide-in-left');
+      setTimeout(()=>track.classList.remove('slide-in-right','slide-in-left'),360);
+    }
+  }
+
+  function shiftCarousel(direction){
+    if(carouselAnimating) return;
+    const track=document.getElementById('videoCarouselTrack');
+    if(!track) return;
+    carouselAnimating=true;
+    setCarouselButtons(true);
+    track.classList.add(direction==='next'?'slide-out-left':'slide-out-right');
+    setTimeout(()=>{
+      carouselStartIndex=direction==='next'
+        ? (carouselStartIndex+1)%carouselVideos.length
+        : (carouselStartIndex-1+carouselVideos.length)%carouselVideos.length;
+      renderCarousel(direction);
+      carouselAnimating=false;
+      setCarouselButtons(false);
+    },340);
+  }
+
+  document.getElementById('carouselPrev')?.addEventListener('click',()=>shiftCarousel('prev'));
+  document.getElementById('carouselNext')?.addEventListener('click',()=>shiftCarousel('next'));
+  const videosSection=document.getElementById('videos');
+  if(videosSection&&'IntersectionObserver' in window){
+    const carouselIo=new IntersectionObserver((entries)=>{
+      if(!entries.some(entry=>entry.isIntersecting)) return;
+      renderCarousel();
+      carouselIo.disconnect();
+    },{rootMargin:'320px 0px'});
+    carouselIo.observe(videosSection);
+  }else{
+    renderCarousel();
+  }
+</script>
+</body>
+</html>
