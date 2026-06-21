@@ -50,12 +50,20 @@ from torch.utils.data._utils.collate import default_collate
 from omegaconf import OmegaConf
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from models import (  # noqa: E402
-    MovementConvEncoder,
-    MovementConvDecoder,
-    MotionEncoderBiGRUCo,
-    TextEncoderBiGRUCo,
-)
+try:  # works both as a package import and as a script run from this directory
+    from .models import (  # noqa: E402
+        MovementConvEncoder,
+        MovementConvDecoder,
+        MotionEncoderBiGRUCo,
+        TextEncoderBiGRUCo,
+    )
+except ImportError:
+    from models import (  # noqa: E402
+        MovementConvEncoder,
+        MovementConvDecoder,
+        MotionEncoderBiGRUCo,
+        TextEncoderBiGRUCo,
+    )
 
 try:
     import wandb

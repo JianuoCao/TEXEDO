@@ -44,7 +44,7 @@ checkpoints:
       remote: glove/glove.tar.gz
       local: glove/glove.tar.gz
       unpack: true
-      note: "Unpacks to glove/glove/ (vocab + vectors)."
+      note: "Must unpack so our_vab_data.npy / our_vab_idx.pkl / our_vab_words.pkl sit directly in assets/glove/ (WordVectorizer reads them there)."
 
 # Loaded from the public HF hub at runtime by the generator; not hosted here.
 runtime:

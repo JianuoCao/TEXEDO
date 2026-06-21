@@ -26,8 +26,12 @@ from typing import Union
 import numpy as np
 import torch
 
-from models import MotionEncoderBiGRUCo, MovementConvEncoder, TextEncoderBiGRUCo
-from train_evaluator import WordVectorizer, root_pos_to_vel_np
+try:  # works both as a package import (verifiers.semantic.inference) and as a script
+    from .models import MotionEncoderBiGRUCo, MovementConvEncoder, TextEncoderBiGRUCo
+    from .train_evaluator import WordVectorizer, root_pos_to_vel_np
+except ImportError:
+    from models import MotionEncoderBiGRUCo, MovementConvEncoder, TextEncoderBiGRUCo
+    from train_evaluator import WordVectorizer, root_pos_to_vel_np
 
 _WORD_RE = re.compile(r"[a-zA-Z]+")
 
