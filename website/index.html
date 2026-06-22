@@ -58,8 +58,6 @@
     font-family:var(--sans);font-size:clamp(1rem,1.5vw,1.18rem);font-weight:500;
     color:var(--ink);line-height:1.5;margin:0 auto 8px;max-width:none;
   }
-  .publication-authors a{color:inherit;text-decoration:none}
-  .publication-authors a:hover{text-decoration:underline;text-underline-offset:3px}
   .publication-authors .author-block{margin:0 .35em;white-space:nowrap}
   .publication-authors sup{font-size:.66em;color:var(--accent)}
   .publication-affiliations{
@@ -425,8 +423,8 @@
     <span class="author-block">Yuxin Chen<sup>*2</sup>,</span>
     <span class="author-block">Yuzhen Song<sup>2,3</sup>,</span>
     <span class="author-block">Masayoshi Tomizuka<sup>2</sup>,</span>
-    <span class="author-block"><a href="https://www.linkedin.com/in/chenran-li-b70078197/" target="_blank" rel="noopener">Chenran Li</a><sup>2</sup>,</span>
-    <span class="author-block"><a href="https://thomasrantian.github.io" target="_blank" rel="noopener">Ran(Thomas) Tian</a><sup>2</sup></span>
+    <span class="author-block">Chenran Li<sup>2</sup>,</span>
+    <span class="author-block">Ran(Thomas) Tian<sup>2</sup></span>
   </div>
   <div class="publication-affiliations reveal d3">
     <sup>1</sup>Nanjing University &nbsp;&nbsp; <sup>2</sup>University of California, Berkeley &nbsp;&nbsp; <sup>3</sup>Southern University of Science and Technology
@@ -528,7 +526,7 @@ Across large-scale simulation studies and real-world deployment on a Unitree G1,
           <div class="cap" id="demoPreviewCap"></div>
         </div>
         <div class="demo-deploy-side">
-          <button class="demo-deploybtn" id="demoDeployBtn">Deploy by <a href="https://arxiv.org/abs/2511.07820" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;text-underline-offset:3px">Sonic</a></button>
+          <button class="demo-deploybtn" id="demoDeployBtn">Deploy by <a href="https://arxiv.org/abs/2511.07820" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;text-underline-offset:3px">SONIC</a></button>
           <div class="demo-result" id="demoResult" hidden></div>
         </div>
       </div>
@@ -1016,7 +1014,7 @@ Across large-scale simulation studies and real-world deployment on a Unitree G1,
       vsrc.innerHTML=`<source src="${vsrcFor(c)}" type="video/mp4">`; vsrc.load(); wireVideoPlaceholder(vsrc);
       previewCap.innerHTML=`Selected for deploy <b>${idLabel(pick)}</b>`;
       deployBtn.disabled=false;
-      deployBtn.innerHTML='Deploy by <a href="https://arxiv.org/abs/2511.07820" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;text-underline-offset:3px">Sonic</a>';
+      deployBtn.innerHTML='Deploy by <a href="https://arxiv.org/abs/2511.07820" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;text-underline-offset:3px">SONIC</a>';
     }
 
     /* ---- deploy ------------------------------------------------------- */
@@ -1052,7 +1050,7 @@ Across large-scale simulation studies and real-world deployment on a Unitree G1,
           </div>`;
       }
       requestAnimationFrame(()=>resultEl.classList.add('show'));
-      deployBtn.innerHTML='Re-deploy by <a href="https://arxiv.org/abs/2511.07820" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;text-underline-offset:3px">Sonic</a>';
+      deployBtn.innerHTML='Re-deploy by <a href="https://arxiv.org/abs/2511.07820" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;text-underline-offset:3px">SONIC</a>';
     });
 
     shufflePrompts();
