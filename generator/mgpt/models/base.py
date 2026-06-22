@@ -117,7 +117,7 @@ class BaseModel(LightningModule):
                 self.metrics,
                 metric).compute(sanity_flag=self.trainer.sanity_checking)
             metrics_log_dict.update({
-                f"Metrics/{metric}": value.item()
+                f"Metrics/{metric}": value.item() if hasattr(value, "item") else float(value)
                 for metric, value in metrics_dict.items()
             })
 

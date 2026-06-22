@@ -25,10 +25,11 @@ import argparse
 import os
 import subprocess
 import sys
+from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 
 # EGL must be selected before mujoco is imported.
-os.environ.setdefault("MUJOCO_GL", "egl")
+os.environ["MUJOCO_GL"] = "egl"
 
 import numpy as np
 
@@ -80,6 +81,48 @@ def _load_motion_csv(path: Path) -> np.ndarray:
     raise ValueError(f"Unsupported file type: {path}")
 
 
+def _apply_white_floor_gray_grid(m) -> None:
+    """Use a white background/floor with a light gray grid."""
+    import mujoco
+
+    # White skybox/background.
+    for tex_id in range(m.ntex):
+        if m.tex_type[tex_id] == mujoco.mjtTexture.mjTEXTURE_SKYBOX:
+            adr = m.tex_adr[tex_id]
+            size = m.tex_height[tex_id] * m.tex_width[tex_id] * m.tex_nchannel[tex_id]
+            m.tex_data[adr:adr + size] = 255
+
+    # White ground texture with thin gray tile borders.
+    ground_tex_id = mujoco.mj_name2id(m, mujoco.mjtObj.mjOBJ_TEXTURE, "groundplane")
+    if ground_tex_id >= 0:
+        width = m.tex_width[ground_tex_id]
+        height = m.tex_height[ground_tex_id]
+        channels = m.tex_nchannel[ground_tex_id]
+        adr = m.tex_adr[ground_tex_id]
+        tile = np.full((height, width, channels), 255, dtype=np.uint8)
+        grid_color = 210
+        tile[0, :, :] = grid_color
+        tile[-1, :, :] = grid_color
+        tile[:, 0, :] = grid_color
+        tile[:, -1, :] = grid_color
+        m.tex_data[adr:adr + height * width * channels] = tile.reshape(-1)
+
+    ground_mat_id = mujoco.mj_name2id(m, mujoco.mjtObj.mjOBJ_MATERIAL, "groundplane")
+    if ground_mat_id >= 0:
+        m.mat_rgba[ground_mat_id] = np.array([1.0, 1.0, 1.0, 1.0])
+        m.mat_reflectance[ground_mat_id] = 0.0
+
+    floor_id = mujoco.mj_name2id(m, mujoco.mjtObj.mjOBJ_GEOM, "floor")
+    if floor_id >= 0:
+        m.geom_rgba[floor_id] = np.array([1.0, 1.0, 1.0, 1.0])
+
+    m.vis.rgba.haze[:] = np.array([1.0, 1.0, 1.0, 1.0])
+    try:
+        m.vis.rgba.fog[:] = np.array([1.0, 1.0, 1.0, 1.0])
+    except AttributeError:
+        pass
+
+
 def render_motion(
     data: np.ndarray,
     output_path: str,
@@ -118,6 +161,7 @@ def render_motion(
             m.light_castshadow[:] = 0
         if m.nmat:
             m.mat_reflectance[:] = 0.0
+        _apply_white_floor_gray_grid(m)
 
         # Camera setup.
         dynamic_camera = None
@@ -198,6 +242,44 @@ def render_motion(
         return False
 
 
+def _render_file(args: tuple) -> tuple[str, bool]:
+    (
+        file_path,
+        output_dir,
+        fps,
+        width,
+        height,
+        model_path,
+        dynamic_root_camera,
+        use_xml_camera,
+        track_distance,
+        track_azimuth,
+        track_elevation,
+        lookat_height,
+        crf,
+        preset,
+    ) = args
+    file_path = Path(file_path)
+    out_mp4 = str(Path(output_dir) / f"{file_path.stem}.mp4")
+    motion = _load_motion_csv(file_path)
+    ok = render_motion(
+        motion,
+        out_mp4,
+        fps=fps,
+        resolution=(width, height),
+        model_path=model_path,
+        dynamic_root_camera=dynamic_root_camera,
+        use_xml_camera=use_xml_camera,
+        track_distance=track_distance,
+        track_azimuth=track_azimuth,
+        track_elevation=track_elevation,
+        lookat_height=lookat_height,
+        crf=crf,
+        preset=preset,
+    )
+    return str(file_path), ok
+
+
 def main() -> None:
     p = argparse.ArgumentParser(
         description="Render 36-dim G1 motions to MuJoCo MP4 videos (EGL headless)"
@@ -225,6 +307,8 @@ def main() -> None:
                    help="Meters above the root position that the dynamic camera looks at")
     p.add_argument("--crf", type=int, default=20)
     p.add_argument("--preset", type=str, default="medium")
+    p.add_argument("--workers", type=int, default=1,
+                   help="Number of parallel render workers for --input-dir")
     args = p.parse_args()
 
     if args.input:
@@ -251,25 +335,41 @@ def main() -> None:
         )
 
     args.output_dir.mkdir(parents=True, exist_ok=True)
+    worker_args = [
+        (
+            str(f),
+            str(args.output_dir),
+            args.fps,
+            args.width,
+            args.height,
+            model_path,
+            args.free_camera and args.xml_camera is None,
+            args.xml_camera,
+            args.track_distance,
+            args.track_azimuth,
+            args.track_elevation,
+            args.lookat_height,
+            args.crf,
+            args.preset,
+        )
+        for f in files
+    ]
+
     ok = 0
-    for f in files:
-        out_mp4 = str(args.output_dir / f"{f.stem}.mp4")
-        motion = _load_motion_csv(f)
-        if render_motion(
-            motion, out_mp4,
-            fps=args.fps,
-            resolution=(args.width, args.height),
-            model_path=model_path,
-            dynamic_root_camera=args.free_camera and args.xml_camera is None,
-            use_xml_camera=args.xml_camera,
-            track_distance=args.track_distance,
-            track_azimuth=args.track_azimuth,
-            track_elevation=args.track_elevation,
-            lookat_height=args.lookat_height,
-            crf=args.crf,
-            preset=args.preset,
-        ):
-            ok += 1
+    workers = max(1, args.workers)
+    if workers == 1 or len(files) == 1:
+        for item in worker_args:
+            _, rendered = _render_file(item)
+            ok += int(rendered)
+    else:
+        print(f"Rendering {len(files)} files with {workers} EGL worker processes...")
+        with ProcessPoolExecutor(max_workers=workers) as executor:
+            futures = [executor.submit(_render_file, item) for item in worker_args]
+            for future in as_completed(futures):
+                file_path, rendered = future.result()
+                ok += int(rendered)
+                status = "✓" if rendered else "✗"
+                print(f"{status} {Path(file_path).name}")
     print(f"Done: {ok}/{len(files)} rendered -> {args.output_dir}")
 
 

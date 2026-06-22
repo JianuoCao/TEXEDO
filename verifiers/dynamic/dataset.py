@@ -98,7 +98,7 @@ def load_from_csv(csv_path: str, motion_dir: str) -> List[Dict]:
       csv_path, motion_key, base_id, is_success,
       success, progress, accel_dist, vel_dist
     """
-    df = pd.read_csv(csv_path)
+    df = pd.read_csv(csv_path, dtype={"traj_id": str})
     motion_dir = Path(motion_dir)
 
     samples = []

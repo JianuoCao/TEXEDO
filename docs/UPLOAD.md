@@ -9,14 +9,14 @@ uploading is just packaging `assets/` and pushing it.
 ```bash
 pip install -U huggingface_hub
 huggingface-cli login                                   # token with `write` access
-huggingface-cli repo create TEXEDO-checkpoints --type model
+huggingface-cli repo create TEXEDO-Checkpoint --type model
 ```
 
-## 1. Build the two tarballs the manifest expects
-Two entries are marked `unpack: true` in `configs/paths.yaml` and ship as `.tar.gz`. Build them from
+## 1. Build the tarballs the manifest expects
+Entries marked `unpack: true` in `configs/paths.yaml` ship as `.tar.gz`. Build them from
 the bundled `assets/` (run from the repo root):
 ```bash
-mkdir -p upload/{tokenizer,generator,verifiers/dynamic,verifiers/semantic,glove}
+mkdir -p upload/{tokenizer,generator,verifiers/dynamic,verifiers/semantic,glove,robot}
 
 # semantic evaluator tree -> one archive
 tar -czf upload/verifiers/semantic/t2m_custom36_combinedv2.tar.gz \
@@ -24,6 +24,9 @@ tar -czf upload/verifiers/semantic/t2m_custom36_combinedv2.tar.gz \
 
 # glove vocab -> one archive (our_vab_* files at the archive root)
 tar -czf upload/glove/glove.tar.gz -C assets/glove .
+
+# Unitree G1 robot model -> one archive
+tar -czf upload/robot/g1.tar.gz -C assets/robot g1
 ```
 
 ## 2. Stage the plain checkpoint files (copy from assets/)
@@ -40,15 +43,15 @@ The resulting `upload/` mirrors each manifest entry's `remote` path exactly.
 ## 3. Upload
 ```bash
 # resumable + parallel (best for the 3.4 GB generator ckpt)
-hf upload-large-folder <you>/TEXEDO-checkpoints upload --repo-type=model
+hf upload-large-folder JianuoCao/TEXEDO-Checkpoint upload --repo-type=model
 ```
-Or file-by-file: `huggingface-cli upload <you>/TEXEDO-checkpoints <local> <remote>`.
+Or file-by-file: `huggingface-cli upload JianuoCao/TEXEDO-Checkpoint <local> <remote>`.
 
 ## 4. Point the manifest at your repo
 Edit `configs/paths.yaml`:
 ```yaml
 checkpoints:
-  hf_repo: <you>/TEXEDO-checkpoints   # was: TODO_USER_MODEL_REPO
+  hf_repo: JianuoCao/TEXEDO-Checkpoint
 ```
 
 ## 5. Verify

@@ -10,10 +10,8 @@ python scripts/download_assets.py             # fetch everything
 python scripts/download_assets.py --only fsq_tokenizer,generator
 ```
 
-The dataset (`JianuoCao/TEXEDO`) is public. The checkpoints ship in a *separate* Hugging Face
-**model** repo that you create — see `docs/UPLOAD.md`. Until `checkpoints.hf_repo` in
-`configs/paths.yaml` is set, `--dry-run` still resolves and prints the intended layout; a real
-download raises a clear error pointing back to `docs/UPLOAD.md`.
+The dataset (`JianuoCao/TEXEDO`) is public. The checkpoints ship in the separate Hugging Face
+**model** repo `JianuoCao/TEXEDO-Checkpoint`, configured in `configs/paths.yaml`.
 
 ## Checkpoint manifest
 
@@ -26,6 +24,7 @@ download raises a clear error pointing back to `docs/UPLOAD.md`.
 | `dynamic_norm_stats` | Normalization stats paired with the `v5` checkpoint | `verifiers/dynamic/norm_stats.npz` | ~2 KB |
 | `semantic_evaluator` | Text–motion matching evaluator (match net + motion/text decomposition + meta), tarball | `verifiers/semantic/t2m_custom36_combinedv2/` (unpacked) | ~variable |
 | `glove` | GloVe vocab (`our_vab_*`) for the semantic text encoder, tarball | `glove/` (unpacked) | ~20 MB |
+| `g1_robot` | Unitree G1 MuJoCo model (`xml` + meshes), tarball | `robot/g1/` (unpacked) | ~26 MB |
 | `flan_t5_base` (runtime) | Base LM the generator fine-tunes from | loaded from `google/flan-t5-base` at runtime — **not** downloaded here | n/a |
 
 Notes:

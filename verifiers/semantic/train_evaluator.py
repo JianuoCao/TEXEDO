@@ -49,6 +49,9 @@ from torch.nn.utils import clip_grad_norm_
 from torch.utils.data._utils.collate import default_collate
 from omegaconf import OmegaConf
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+import textseedo.paths  # noqa: F401,E402
+
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 try:  # works both as a package import and as a script run from this directory
     from .models import (  # noqa: E402
@@ -1184,7 +1187,8 @@ def main():
     np.random.seed(cfg.seed)
     torch.manual_seed(cfg.seed)
 
-    device = torch.device(f"cuda:{cfg.gpu_id}" if torch.cuda.is_available() else "cpu")
+    use_cuda = cfg.gpu_id >= 0 and torch.cuda.is_available()
+    device = torch.device(f"cuda:{cfg.gpu_id}" if use_cuda else "cpu")
     print(f"Using device: {device}")
 
     # Ensure dirs exist

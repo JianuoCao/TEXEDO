@@ -1,184 +1,139 @@
-# TEXEDO
+# TEXEDO: Test-Time Scaling for Controller-Aware Language-Conditioned Humanoid Motion Generation
 
-A reproducible **text → motion** pipeline for the Unitree G1 humanoid. A language model turns
-text into discrete motion tokens, an FSQ tokenizer decodes them to 36-dim motion, and two
-verifiers (physical plausibility + text–motion match) rank candidates for best-of-N selection.
+<p align="center">
+  <a href="https://jianuocao.github.io/TEXEDO/"><img src="https://img.shields.io/badge/Website-TEXEDO-blue" alt="Website"></a>
+  <a href="https://arxiv.org/abs/2604.11251"><img src="https://img.shields.io/badge/arXiv-2604.11251-b31b1b.svg" alt="arXiv"></a>
+  <a href="https://huggingface.co/datasets/JianuoCao/TEXEDO"><img src="https://img.shields.io/badge/Data-Hugging%20Face-yellow?logo=huggingface" alt="Dataset"></a>
+  <a href="https://huggingface.co/JianuoCao/TEXEDO-Checkpoint"><img src="https://img.shields.io/badge/Models-Hugging%20Face-yellow?logo=huggingface" alt="Models"></a>
+</p>
 
-```
-            ┌─────────────┐    tokens     ┌──────────────┐  36-dim motion
-  text ───▶ │  generator  │ ─────────────▶│  FSQ decode  │ ───────────────┐
-            │  (flan-t5)  │               │ (tokenizer)  │                │
-            └─────────────┘               └──────────────┘                ▼
-                                                                ┌────────────────────┐
-                                                                │  dynamic verifier  │ reward
-                                                                │  semantic verifier │ match
-                                                                └────────────────────┘
-                                                                          │ best-of-N
-                                                                          ▼ selected motion
-```
+<p align="center">
+  <a href="https://jianuocao.github.io">Jianuo Cao</a><sup>*1,2</sup>,
+  <a href="https://thomaschen98.github.io">Yuxin Chen</a><sup>*2</sup>,
+  Yuzhen Song<sup>2,3</sup>,
+  <a href="https://me.berkeley.edu/people/masayoshi-tomizuka/">Masayoshi Tomizuka</a><sup>2</sup>,
+  Chenran Li<sup>2</sup>,
+  Thomas Tian<sup>2</sup>
+</p>
 
-## Repository layout
-| Dir | What | Train entry | Inference entry |
-|---|---|---|---|
-| [`textseedo/`](textseedo/) | shared path resolver + 36-dim format (no model) | — | — |
-| [`tokenizer/`](tokenizer/) | FSQ motion tokenizer (36-dim ↔ tokens) | `fsq_train.py` | `encode_motion_tokens.py`, `fsq_adapter.py` |
-| [`generator/`](generator/) | flan-t5 LM over motion tokens (multitask) | `train.py` | `demo.py` |
-| [`verifiers/dynamic/`](verifiers/dynamic/) | physical-plausibility reward model | `train_verifier.py` | `predict_rewards.py` |
-| [`verifiers/semantic/`](verifiers/semantic/) | text–motion matching evaluator | `train_evaluator.py` | `inference.py` |
-| [`pipeline/`](pipeline/) | generate → score → best-of-N | — | `generate / score / select_best_of_n` |
-| `scripts/` | asset staging/download + visualization | — | — |
+<p align="center">
+  <sup>*</sup>Equal contribution<br>
+  <sup>1</sup>Nanjing University &nbsp;&nbsp;
+  <sup>2</sup>University of California, Berkeley &nbsp;&nbsp;
+  <sup>3</sup>Southern University of Science and Technology
+</p>
 
----
+<p align="center">
+  <img src="assets/images/overview.png" alt="TEXEDO pipeline overview" width="100%">
+</p>
 
-## 1. Install
+TEXEDO is a text-to-motion pipeline for the Unitree G1 humanoid. It generates multiple candidate motions from a language prompt, decodes them into a 36-dimensional robot motion format, scores them with dynamic and semantic verifiers, and selects the best candidate at test time.
+
+## Highlights
+
+- FSQ motion tokenizer for 36-dim Unitree G1 motion.
+- FLAN-T5 generator over discrete motion tokens.
+- Dynamic and semantic verifiers for best-of-N candidate selection.
+- Public dataset and released checkpoints hosted on Hugging Face.
+
+## Installation
+
 ```bash
-git clone <this-repo> TEXEDO && cd TEXEDO
-conda env create -f environment.yml && conda activate TEXEDO   # or: pip install -r requirements.txt
+git clone https://github.com/JianuoCao/TEXEDO.git
+cd TEXEDO
+
+conda env create -f environment.yml
+conda activate TEXEDO
 pip install -e .
 ```
-Python 3.10, PyTorch 2.5.1, CUDA 12.4.
 
-Paths resolve from two environment variables (defaults shown):
+By default, TEXEDO stores checkpoints in `./assets` and datasets in `./data`. You can override these locations:
+
 ```bash
-export TSD_ASSETS=$PWD/assets    # checkpoints live here
-export TSD_DATA=$PWD/data        # datasets live here
-```
-You can skip the exports to use the defaults (`./assets`, `./data`).
-
----
-
-## 2. Get the checkpoints
-
-**Which checkpoints, and where they go** (everything lives under `$TSD_ASSETS`, i.e. `./assets`):
-
-| Checkpoint | Destination under `assets/` | Needed for | Size |
-|---|---|---|---|
-| FSQ tokenizer | `tokenizer/checkpoint_epoch_95.pt` | tokenize, generator (frozen), data prep | 225 MB |
-| FSQ norm stats | `tokenizer/fsq_motion_stats_combined.npz` | tokenizer | 2 KB |
-| Generator LM | `generator/epoch=489.ckpt` | text→motion inference | 3.4 GB |
-| Dynamic verifier | `verifiers/dynamic/checkpoint_last.pt` | dynamic scoring | 42 MB |
-| Dynamic norm stats | `verifiers/dynamic/norm_stats.npz` | dynamic scoring | 2 KB |
-| Semantic evaluator | `verifiers/semantic/t2m_custom36_combinedv2/custom36/t2m/text_mot_match/model/finest.tar` | semantic scoring | ~20 MB |
-| Semantic mean/std | `verifiers/semantic/t2m_custom36_combinedv2/custom36/t2m/Comp_v6_KLD01/meta/{mean,std}.npy` | semantic scoring | small |
-| GloVe vocab | `glove/our_vab_data.npy`, `glove/our_vab_idx.pkl`, `glove/our_vab_words.pkl` | semantic text encoding | small |
-| flan-t5-base | *(not stored — pulled from HF `google/flan-t5-base` at runtime)* | generator LM | auto |
-
-Fetch them from the Hugging Face Hub:
-```bash
-# set checkpoints.hf_repo in configs/paths.yaml first (see docs/UPLOAD.md), then:
-python scripts/download_assets.py --dry-run     # show what will be fetched (no network)
-python scripts/download_assets.py               # download into assets/
+export TSD_ASSETS=/path/to/assets
+export TSD_DATA=/path/to/data
 ```
 
-Verify placement any time:
+## Download Assets
+
+The dataset lives at [`JianuoCao/TEXEDO`](https://huggingface.co/datasets/JianuoCao/TEXEDO). Checkpoints and runtime assets live at [`JianuoCao/TEXEDO-Checkpoint`](https://huggingface.co/JianuoCao/TEXEDO-Checkpoint).
+
 ```bash
-find assets -maxdepth 4 -type f | sort
+python scripts/download_assets.py --dry-run
+python scripts/download_assets.py
 ```
-> The dataset is public, but the checkpoints must be hosted in a model repo you control — see
-> [docs/UPLOAD.md](docs/UPLOAD.md) to publish them and set `checkpoints.hf_repo`.
 
----
+`--dry-run` only prints what would be downloaded. The second command downloads checkpoints, verifiers, GloVe files, and the G1 robot assets into `assets/`.
 
-## 3. Prepare the dataset
-Downloads the public [`JianuoCao/TEXEDO`](https://huggingface.co/datasets/JianuoCao/TEXEDO)
-dataset, flattens it to the training layout, and regenerates FSQ tokens (needs the FSQ checkpoint
-from step 2).
+## Inference
+
+Generate candidates, score them, select the best motion, and render it:
+
 ```bash
-python generator/scripts/prepare_dataset.py                 # full dataset
-python generator/scripts/prepare_dataset.py --limit 50      # quick smoke subset
-```
-Result: `data/CustomCombined/{new_joint_vecs/, texts/, TOKENS_FSQ/, train|val|test.txt, template_*.json}`.
+python -m pipeline.generate \
+  --prompt "a person waves with the right hand" \
+  --num-samples 8 \
+  --out-dir candidates/
 
-> Inference (step 4) does **not** need this — only training (step 5) does.
+python -m pipeline.score \
+  --motion-dir candidates/ \
+  --caption "a person waves with the right hand" \
+  --output scores.csv
 
----
+python -m pipeline.select_best_of_n \
+  --scores scores.csv \
+  --motion-dir candidates/ \
+  --copy-best-to best/
 
-## 4. Run inference (text → motion, best-of-N)
-Needs: generator + FSQ + both verifiers + GloVe staged in step 2.
-```bash
-# (a) generate N candidates for a prompt
-python -m pipeline.generate --prompt "a person waves with the right hand" \
-    --num-samples 8 --out-dir candidates/
-
-# (b) score every candidate with both verifiers
-python -m pipeline.score --motion-dir candidates/ \
-    --caption "a person waves with the right hand" --output scores.csv
-
-# (c) pick the best and copy it out
-python -m pipeline.select_best_of_n --scores scores.csv \
-    --motion-dir candidates/ --copy-best-to best/
-
-# (d) render the winner to a MuJoCo MP4 video
 python scripts/visualize_csv.py --input-dir best/ --output-dir viz/
 ```
 
-Just want generation, no verifiers? Run the generator directly:
+For generator-only sampling:
+
 ```bash
 cd generator
 python demo.py --task t2m --num_samples 5 \
-    --cfg configs/config_fsq_multitask.yaml --cfg_assets configs/assets.yaml
-cd ..
+  --cfg configs/config_fsq_multitask.yaml \
+  --cfg_assets configs/assets.yaml
 ```
 
-Score a motion programmatically:
-```python
-from pipeline.score import DynamicScorer, SemanticScorer
-import numpy as np
-motion = np.load("best/<id>.npy")                       # (T, 36)
-print(DynamicScorer().score(motion))                    # {'reward_hat': ..., ...}  higher = better
-print(SemanticScorer().score(motion, "a person waves")) # L2 distance, lower = better
-```
+## Data Preparation
 
----
+Inference uses the released checkpoints and does not require dataset preparation. For training, prepare the public dataset into the local `CustomCombined` layout:
 
-## 5. Run training
-Run stages in order. Each writes its own checkpoint; later stages consume earlier ones.
-
-**5.1 FSQ tokenizer** (optional — a trained checkpoint ships in step 2):
 ```bash
-python tokenizer/precompute_fsq_stats.py        # optional: recompute normalization stats
+python generator/scripts/prepare_dataset.py
+```
+
+This downloads the dataset, flattens motions/texts, copies split files, and regenerates FSQ token files under `data/CustomCombined/`.
+
+## Training
+
+The released checkpoints are ready to use. To reproduce or retrain components, see [docs/REPRODUCE.md](docs/REPRODUCE.md). Main entry points:
+
+```bash
+# Generator
+(cd generator && python train.py --cfg configs/config_fsq_multitask.yaml --cfg_assets configs/assets.yaml --nodebug)
+
+# Semantic verifier
+python verifiers/semantic/train_evaluator.py --config verifiers/semantic/configs/evaluator.yaml --step all
+
+# FSQ tokenizer
 python tokenizer/fsq_train.py --config tokenizer/configs/fsq_combined.yaml
-python tokenizer/encode_motion_tokens.py \
-    --checkpoint assets/tokenizer/checkpoint_epoch_95.pt \
-    --data-folder data/CustomCombined/new_joint_vecs \
-    --output-dir  data/CustomCombined/TOKENS_FSQ
 ```
-
-**5.2 Generator** (flan-t5 multitask LM; loads the frozen FSQ tokenizer):
-```bash
-cd generator
-python train.py --cfg configs/config_fsq_multitask.yaml \
-    --cfg_assets configs/assets.yaml --nodebug
-cd ..
-```
-
-**5.3 Dynamic verifier** (physical-plausibility reward):
-```bash
-python verifiers/dynamic/train_verifier.py \
-    --train_csv <train_labels.csv> --eval_csv <eval_labels.csv> \
-    --train_motion_dir <dir_of_{id}.npy> --eval_motion_dir <dir> \
-    --save_dir assets/verifiers/dynamic
-```
-
-**5.4 Semantic verifier** (text–motion matching):
-```bash
-python verifiers/semantic/train_evaluator.py \
-    --config verifiers/semantic/configs/evaluator.yaml --step all
-```
-
----
 
 ## Documentation
-- [docs/FORMAT.md](docs/FORMAT.md) — the 36-dim motion representation + G1 joint order.
-- [docs/DATA.md](docs/DATA.md) — TEXEDO dataset + prepared training layout.
-- [docs/MODELS.md](docs/MODELS.md) / [docs/UPLOAD.md](docs/UPLOAD.md) — checkpoint inventory and HF hosting.
-- [docs/REPRODUCE.md](docs/REPRODUCE.md) — condensed end-to-end recipe.
 
-## Notes
-- **FSQ-only** release (the legacy VQVAE tokenizer was removed).
-- flan-t5-base is pulled from the public HF hub at runtime; SMPL meshes / whisper are not used
-  (visualization renders the G1 from the 36-dim representation).
+- [docs/FORMAT.md](docs/FORMAT.md): 36-dim Unitree G1 motion format.
+- [docs/DATA.md](docs/DATA.md): dataset layout and preparation.
+- [docs/MODELS.md](docs/MODELS.md): checkpoints and runtime assets.
+- [docs/REPRODUCE.md](docs/REPRODUCE.md): end-to-end reproduction notes.
+- [docs/UPLOAD.md](docs/UPLOAD.md): checkpoint hosting on Hugging Face.
+
+## Acknowledgements
+
+TEXEDO builds on open-source tools and models including PyTorch, Hugging Face Transformers, FLAN-T5, MotionGPT-style motion-token language modeling, FSQ/vector-quantization components, MuJoCo, and the Unitree G1 model assets. The dataset includes motion sources derived from AMASS and CLAW; please consult the corresponding dataset/model cards and licenses before redistribution or commercial use.
 
 ## License
-MIT (code) — see [LICENSE](LICENSE). Third-party data (TEXEDO ← AMASS/CLAW) and flan-t5 weights
-keep their own licenses.
+
+The code in this repository is released under the MIT license. Third-party datasets, pretrained models, robot assets, and dependencies retain their own licenses and terms of use.

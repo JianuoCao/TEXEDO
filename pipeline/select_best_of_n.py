@@ -28,7 +28,7 @@ def select(scores_csv: Path, alpha: float = 1.0, beta: float = 1.0):
     import numpy as np
     import pandas as pd
 
-    df = pd.read_csv(scores_csv).copy()
+    df = pd.read_csv(scores_csv, dtype={"motion_key": str}).copy()
     has_dyn = "R_dyn_reward_hat" in df.columns
     has_sem = "R_sem_matching_dist" in df.columns
     if not (has_dyn or has_sem):
