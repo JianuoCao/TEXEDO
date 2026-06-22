@@ -1,4 +1,4 @@
-# TEXEDO: Test-Time Scaling for Controller-Aware Language-Conditioned Humanoid Motion Generation
+# TEXEDO 🤵🏻: Test-Time Scaling for Controller-Aware Language-Conditioned Humanoid Motion Generation
 
 <p align="center">
   <a href="https://jianuocao.github.io/TEXEDO/"><img src="https://img.shields.io/badge/Website-TEXEDO-blue" alt="Website"></a>
@@ -27,14 +27,14 @@
   <img src="assets/images/overview.png" alt="TEXEDO pipeline overview" width="100%">
 </p>
 
-TEXEDO is a text-to-motion pipeline for the Unitree G1 humanoid. It generates multiple candidate motions from a language prompt, decodes them into a 36-dimensional robot motion format, scores them with dynamic and semantic verifiers, and selects the best candidate at test time.
+TEXEDO is a text-to-motion pipeline for the Unitree G1 humanoid. It generates multiple candidate motions from a language prompt, decodes them into a 36-dimensional g1 robot motion format, scores them with dynamic and semantic verifiers, and selects the best candidate for deployment.
 
 ## Highlights
 
-- FSQ motion tokenizer for 36-dim Unitree G1 motion.
+- FSQ motion tokenizer for Unitree G1 motion.
 - FLAN-T5 generator over discrete motion tokens.
-- Dynamic and semantic verifiers for best-of-N candidate selection.
-- Public dataset and released checkpoints hosted on Hugging Face.
+- Dynamic and semantic verifiers for motion scoring.
+- Open-source dataset and released checkpoints.
 
 ## Installation
 
@@ -130,9 +130,6 @@ python tokenizer/fsq_train.py --config tokenizer/configs/fsq_combined.yaml
 - [docs/REPRODUCE.md](docs/REPRODUCE.md): end-to-end reproduction notes.
 - [docs/UPLOAD.md](docs/UPLOAD.md): checkpoint hosting on Hugging Face.
 
-## Acknowledgements
-
-TEXEDO builds on open-source tools and models including PyTorch, Hugging Face Transformers, FLAN-T5, MotionGPT-style motion-token language modeling, FSQ/vector-quantization components, MuJoCo, and the Unitree G1 model assets. The dataset includes motion sources derived from AMASS and CLAW; please consult the corresponding dataset/model cards and licenses before redistribution or commercial use.
 
 ## License
 
