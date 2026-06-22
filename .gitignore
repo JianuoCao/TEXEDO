@@ -1,5 +1,6 @@
 # Downloaded assets & datasets (fetched via scripts/download_assets.py)
 /assets/
+!/assets/images/
 /data/
 
 # Training outputs
