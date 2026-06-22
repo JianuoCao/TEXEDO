@@ -1,5 +1,5 @@
 # Downloaded assets & datasets (fetched via scripts/download_assets.py)
-/assets/
+/assets/*
 !/assets/images/
 /data/
 
