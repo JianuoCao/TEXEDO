@@ -1,4 +1,4 @@
-<h1 align="center"><span style="white-space:nowrap">TEXEDO&nbsp;<img class="tw-emoji" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f935-1f3fb.svg" alt="person in tuxedo" height="27">:</span> Test-Time Scaling for Controller-Aware Language-Conditioned Humanoid Motion Generation</h1>
+<h1 align="center">TEXEDO&nbsp;<img class="tw-emoji" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f935-1f3fb.svg" alt="person in tuxedo" height="27">: Test-Time Scaling for Controller-Aware Language-Conditioned Humanoid Motion Generation</h1>
 
 <p align="center">
   <a href="https://jianuocao.github.io/TEXEDO/"><img src="https://img.shields.io/badge/Website-TEXEDO-blue" alt="Website"></a>
