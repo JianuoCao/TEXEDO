@@ -140,17 +140,15 @@ python verifiers/semantic/train_evaluator.py --config verifiers/semantic/configs
 
 ## Citation
 
-```bibtex
-@misc{cao2026texedotesttime,
-      title={TEXEDO : Test Time Scaling for Controller-aware Language-conditioned Humanoid Motion Generation},
-      author={Jianuo Cao and Yuxin Chen and Yuzhen Song and Masayoshi Tomizuka and Chenran Li and Thomas Tian},
-      year={2026},
-      eprint={2606.22998},
-      archivePrefix={arXiv},
-      primaryClass={cs.RO},
-      url={https://arxiv.org/abs/2606.22998},
+@misc{cao2026texedotesttime,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;title={TEXEDO : Test Time Scaling for Controller-aware Language-conditioned Humanoid Motion Generation},<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;author={Jianuo Cao and Yuxin Chen and Yuzhen Song and Masayoshi Tomizuka and Chenran Li and Thomas Tian},<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;year={2026},<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;eprint={2606.22998},<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;archivePrefix={arXiv},<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;primaryClass={cs.RO},<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;url={https://arxiv.org/abs/2606.22998},<br>
 }
-```
 
 ## License
 
