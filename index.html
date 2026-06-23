@@ -413,6 +413,25 @@
   .demo-result .rm .mv{font-family:var(--serif);font-weight:600;font-size:1.15rem;line-height:1;color:var(--ink)}
   .demo-result .rfoot{font-family:var(--mono);font-size:16px;color:var(--muted);margin-top:10px}
   .demo-result .rfoot b{color:var(--fail)}
+
+  /* citation */
+  .citation-card{
+    margin-top:14px;border:1px solid var(--line);border-radius:12px;
+    background:var(--paper-2);overflow:hidden;text-align:left;
+  }
+  .citation-head{
+    display:flex;align-items:center;justify-content:space-between;gap:14px;
+    padding:15px 18px;border-bottom:1px solid var(--line);
+    font-family:var(--mono);font-size:.86rem;color:var(--ink-soft);
+  }
+  .citation-head b{font-size:1rem;color:var(--ink)}
+  .citation-head a{color:var(--accent);text-decoration:none;font-weight:600}
+  .citation-head a:hover{text-decoration:underline;text-underline-offset:3px}
+  .citation-card pre{
+    margin:0;padding:18px;overflow-x:auto;background:transparent;
+    color:var(--ink);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    font-size:.88rem;line-height:1.55;white-space:pre;
+  }
 </style>
 </head>
 <body>
@@ -683,6 +702,26 @@ Across large-scale simulation studies and real-world deployment on a Unitree G1,
       </button>
     </div>
     <div class="carousel-caption" id="carouselCaption"></div>
+  </div>
+</section>
+
+<!-- CITATION -->
+<section id="citation" class="wrap reveal">
+  <div class="sec-tag">Citation</div>
+  <div class="citation-card">
+    <div class="citation-head">
+      <b>BibTeX</b>
+      <a href="https://arxiv.org/abs/2606.22998" target="_blank" rel="noopener">arXiv:2606.22998</a>
+    </div>
+    <pre><code>@misc{cao2026texedotesttime,
+      title={TEXEDO : Test Time Scaling for Controller-aware Language-conditioned Humanoid Motion Generation},
+      author={Jianuo Cao and Yuxin Chen and Yuzhen Song and Masayoshi Tomizuka and Chenran Li and Thomas Tian},
+      year={2026},
+      eprint={2606.22998},
+      archivePrefix={arXiv},
+      primaryClass={cs.RO},
+      url={https://arxiv.org/abs/2606.22998},
+}</code></pre>
   </div>
 </section>
 
