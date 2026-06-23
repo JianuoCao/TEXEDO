@@ -31,4 +31,5 @@ dist/
 /candidates/
 
 # Website generated case tables
+/website/
 /website/videos/web_cases/**/*.csv
