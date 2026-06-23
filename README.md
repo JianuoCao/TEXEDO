@@ -10,7 +10,7 @@
 <p align="center">
   <a href="https://jianuocao.github.io">Jianuo Cao</a><sup>*1,2</sup>,
   <a href="https://thomaschen98.github.io">Yuxin Chen</a><sup>*2</sup>,
-  Yuzhen Song<sup>2,3</sup>,
+  <a href="https://amysong-robotics.github.io">Yuzhen Song</a><sup>2,3</sup>,
   <a href="https://me.berkeley.edu/people/masayoshi-tomizuka/">Masayoshi Tomizuka</a><sup>2</sup>,
   <a href="https://www.linkedin.com/in/chenran-li-b70078197/">Chenran Li</a><sup>2</sup>,
   <a href="https://thomasrantian.github.io">Ran(Thomas) Tian</a><sup>2</sup>
