@@ -138,6 +138,19 @@ python verifiers/semantic/train_evaluator.py --config verifiers/semantic/configs
 - [docs/MODELS.md](docs/MODELS.md): checkpoints and runtime assets.
 - [docs/REPRODUCE.md](docs/REPRODUCE.md): end-to-end reproduction notes.
 
+## Citation
+
+```bibtex
+@misc{cao2026texedotesttime,
+      title={TEXEDO : Test Time Scaling for Controller-aware Language-conditioned Humanoid Motion Generation},
+      author={Jianuo Cao and Yuxin Chen and Yuzhen Song and Masayoshi Tomizuka and Chenran Li and Thomas Tian},
+      year={2026},
+      eprint={2606.22998},
+      archivePrefix={arXiv},
+      primaryClass={cs.RO},
+      url={https://arxiv.org/abs/2606.22998},
+}
+```
 
 ## License
 
