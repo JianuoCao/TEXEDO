@@ -32,8 +32,8 @@ TEXEDO is a text-to-motion pipeline for the Unitree G1 humanoid. It generates mu
 
 - FSQ motion tokenizer for Unitree G1 motion.
 - FLAN-T5 generator over discrete motion tokens.
-- Dynamic and semantic verifiers for motion scoring.
-- Open-source dataset and released checkpoints.
+- Dynamic and semantic verifiers for humanoid motion scoring and reward modeling.
+
 
 ## TODOs
 
