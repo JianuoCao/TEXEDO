@@ -1,5 +1,5 @@
 from omegaconf import OmegaConf
-from mgpt.config import instantiate_from_config
+from texedo_generator.config import instantiate_from_config
 
 def build_model(cfg, datamodule):
     model_config = OmegaConf.to_container(cfg.model, resolve=True)

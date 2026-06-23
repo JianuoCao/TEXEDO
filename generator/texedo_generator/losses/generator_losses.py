@@ -14,7 +14,7 @@ class CommitLoss(nn.Module):
         return commit
 
 
-class GPTLosses(BaseLosses):
+class GeneratorLosses(BaseLosses):
     
     def __init__(self, cfg, stage, num_joints, **kwargs):
         # Save parameters

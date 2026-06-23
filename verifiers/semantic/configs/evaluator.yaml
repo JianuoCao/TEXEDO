@@ -2,10 +2,10 @@
 #
 # Replaces the original train_evaluator.py `Config` python class. Paths resolve through
 # OmegaConf env interpolation so nothing here is a hardcoded user path:
-#   ${oc.env:TSD_DATA}/...    -> dataset root (see textseedo.paths.DATA_ROOT)
-#   ${oc.env:TSD_ASSETS}/...  -> checkpoint / glove root (see textseedo.paths.ASSETS_ROOT)
+#   ${oc.env:TSD_DATA}/...    -> dataset root (see utilities.paths.DATA_ROOT)
+#   ${oc.env:TSD_ASSETS}/...  -> checkpoint / glove root (see utilities.paths.ASSETS_ROOT)
 #
-# Load with: OmegaConf.load("configs/evaluator.yaml"); textseedo.paths import sets
+# Load with: OmegaConf.load("configs/evaluator.yaml"); utilities.paths import sets
 # TSD_DATA/TSD_ASSETS env defaults (<repo>/data, <repo>/assets) if unset.
 
 data:
@@ -15,7 +15,7 @@ data:
   glove_dir: ${oc.env:TSD_ASSETS}/glove
   code_path: TOKENS_FSQ  # informational only; evaluator trains on new_joint_vecs, not tokens
 
-# Output structured to match MotionGPT's expected path:
+# Output structured to match TEXEDO generator's expected path:
 #   {save_root}/custom36/t2m/text_mot_match/model/finest.tar
 #   {save_root}/custom36/t2m/Decomp_SP001_SM001_H512/model/finest.tar
 #   {save_root}/custom36/t2m/Comp_v6_KLD01/meta/{mean.npy,std.npy}

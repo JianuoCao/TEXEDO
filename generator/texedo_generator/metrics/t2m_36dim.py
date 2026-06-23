@@ -19,7 +19,7 @@ class TM2TMetrics36Dim(TM2TMetrics):
         Load T2M text encoder and motion encoder for evaluating.
         Uses 'custom36' as dataname instead of 't2m'.
         """
-        from mgpt.config import instantiate_from_config
+        from texedo_generator.config import instantiate_from_config
         
         # init module
         self.t2m_textencoder = instantiate_from_config(cfg.METRIC.TM2T.t2m_textencoder)
@@ -75,7 +75,7 @@ class TM2TMetrics36Dim(TM2TMetrics):
         Also fix the double-division bug for UNIT_LEN.
 
         The 36-dim evaluator was trained with motions padded to a fixed
-        max_motion_length. MotionGPT batches are padded only to the batch max,
+        max_motion_length. TEXEDO generator batches are padded only to the batch max,
         and root-position-to-velocity conversion can leave a large invalid
         velocity at the first padded frame. Since the evaluator motion GRU does
         not pack by length, normalize the padding contract here before encoding.

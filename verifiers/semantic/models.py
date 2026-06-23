@@ -1,6 +1,6 @@
 """Encoder architectures for the semantic (text-motion matching) verifier.
 
-Same architecture family as the text-to-motion / MotionGPT evaluator:
+Same architecture family as the text-to-motion / TEXEDO generator evaluator:
   - ``MovementConvEncoder`` / ``MovementConvDecoder``: 1D-conv "movement" codec that
     downsamples a window of raw 36-dim motion frames by 4x into a latent sequence
     (trained as an autoencoder in the "decomp" stage).

@@ -4,7 +4,7 @@ motion files, save per-sample reward predictions merged with an existing
 tracking-metrics CSV.
 
 Usage:
-  conda activate mgpt
+  conda activate TEXEDO
   python -m verifiers.dynamic.predict_rewards \\
     --tracking_csv runs/tracking_predictions.csv \\
     --motion_dir /path/to/motion_npy_dir \\
@@ -23,7 +23,7 @@ from torch.utils.data import DataLoader, Dataset
 from torch.utils.data.dataloader import default_collate
 from tqdm import tqdm
 
-from textseedo.paths import assets
+from utilities.paths import assets
 
 from .dataset import INPUT_DIM, load_norm_stats, transform_36_to_94
 from .model import DynamicVerifier

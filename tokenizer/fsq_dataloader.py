@@ -27,7 +27,7 @@ _repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if _repo_root not in sys.path:
     sys.path.append(_repo_root)
 
-from textseedo.paths import data as data_path
+from utilities.paths import data as data_path
 
 
 def _to_float32_numpy(arr: np.ndarray) -> np.ndarray:
@@ -64,7 +64,7 @@ class SlidingWindowDataset(Dataset):
         self._file_cache: "OrderedDict[str, Dict[str, np.ndarray]]" = OrderedDict()
 
         self.metadata_cache_file = metadata_cache_file or os.path.join(
-            data_folder, ".genmimic_npz_index_v3.json"
+            data_folder, ".texedo_npz_index_v3.json"
         )
         self.rebuild_metadata_cache = rebuild_metadata_cache
 

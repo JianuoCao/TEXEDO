@@ -4,11 +4,11 @@ This page documents the 36-dim motion representation used throughout TEXEDO
 (tokenizer, generator, verifiers, pipeline). It mirrors the format documented in the
 public `JianuoCao/TEXEDO` dataset card.
 
-The code source of truth is `textseedo/motion_format.py` — import constants from there
+The code source of truth is `utilities/motion_format.py` — import constants from there
 instead of hardcoding slice indices or joint names:
 
 ```python
-from textseedo.motion_format import (
+from utilities.motion_format import (
     NFEATS, ROOT_POS_SLICE, ROOT_QUAT_SLICE, JOINT_SLICE, NUM_JOINTS, JOINT_NAMES, FPS,
 )
 ```
@@ -27,7 +27,7 @@ layout (see `docs/DATA.md`) store motions as flat `.npy` files in this format.
 
 ## Joint order
 
-Joint order for `motion[:, 7:36]` (also `textseedo.motion_format.JOINT_NAMES`):
+Joint order for `motion[:, 7:36]` (also `utilities.motion_format.JOINT_NAMES`):
 
 | Joint index | Joint name |
 | ---: | --- |

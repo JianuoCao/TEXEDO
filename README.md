@@ -1,8 +1,8 @@
-# TEXEDO 🤵🏻: Test-Time Scaling for Controller-Aware Language-Conditioned Humanoid Motion Generation
+<h1 align="center">TEXEDO 🤵🏻: Test-Time Scaling for Controller-Aware Language-Conditioned Humanoid Motion Generation</h1>
 
 <p align="center">
   <a href="https://jianuocao.github.io/TEXEDO/"><img src="https://img.shields.io/badge/Website-TEXEDO-blue" alt="Website"></a>
-  <a href="https://arxiv.org/abs/2604.11251"><img src="https://img.shields.io/badge/arXiv-2604.11251-b31b1b.svg" alt="arXiv"></a>
+  <a href="https://arxiv.org/abs/2606.22998"><img src="https://img.shields.io/badge/arXiv-2606.22998-b31b1b.svg" alt="Paper"></a>
   <a href="https://huggingface.co/datasets/JianuoCao/TEXEDO"><img src="https://img.shields.io/badge/Data-Hugging%20Face-yellow?logo=huggingface" alt="Dataset"></a>
   <a href="https://huggingface.co/JianuoCao/TEXEDO-Checkpoint"><img src="https://img.shields.io/badge/Models-Hugging%20Face-yellow?logo=huggingface" alt="Models"></a>
 </p>
@@ -17,7 +17,6 @@
 </p>
 
 <p align="center">
-  <sup>*</sup>Equal contribution<br>
   <sup>1</sup>Nanjing University &nbsp;&nbsp;
   <sup>2</sup>University of California, Berkeley &nbsp;&nbsp;
   <sup>3</sup>Southern University of Science and Technology
@@ -35,6 +34,16 @@ TEXEDO is a text-to-motion pipeline for the Unitree G1 humanoid. It generates mu
 - FLAN-T5 generator over discrete motion tokens.
 - Dynamic and semantic verifiers for motion scoring.
 - Open-source dataset and released checkpoints.
+
+## TODOs
+
+<p>
+  <input type="checkbox" checked disabled> Release datasets.<br>
+  <input type="checkbox" checked disabled> Release checkpoints for the tokenizer, generator, and verifiers.<br>
+  <input type="checkbox" checked disabled> Open-source the training pipeline.<br>
+  <input type="checkbox" disabled> Publish a fast, large-scale controller-aware data collection pipeline.<br>
+  <input type="checkbox" disabled> Add functional demos for text-to-motion, motion-to-text, and motion prediction.
+</p>
 
 ## Installation
 
@@ -112,14 +121,16 @@ This downloads the dataset, flattens motions/texts, copies split files, and rege
 The released checkpoints are ready to use. To reproduce or retrain components, see [docs/REPRODUCE.md](docs/REPRODUCE.md). Main entry points:
 
 ```bash
+# FSQ tokenizer
+python tokenizer/fsq_train.py --config tokenizer/configs/fsq_combined.yaml
+
 # Generator
-(cd generator && python train.py --cfg configs/config_fsq_multitask.yaml --cfg_assets configs/assets.yaml --nodebug)
+cd generator && python train.py --cfg configs/config_fsq_multitask.yaml --cfg_assets configs/assets.yaml --nodebug
 
 # Semantic verifier
 python verifiers/semantic/train_evaluator.py --config verifiers/semantic/configs/evaluator.yaml --step all
 
-# FSQ tokenizer
-python tokenizer/fsq_train.py --config tokenizer/configs/fsq_combined.yaml
+
 ```
 
 ## Documentation
@@ -128,7 +139,6 @@ python tokenizer/fsq_train.py --config tokenizer/configs/fsq_combined.yaml
 - [docs/DATA.md](docs/DATA.md): dataset layout and preparation.
 - [docs/MODELS.md](docs/MODELS.md): checkpoints and runtime assets.
 - [docs/REPRODUCE.md](docs/REPRODUCE.md): end-to-end reproduction notes.
-- [docs/UPLOAD.md](docs/UPLOAD.md): checkpoint hosting on Hugging Face.
 
 
 ## License

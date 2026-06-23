@@ -33,7 +33,7 @@ _repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if _repo_root not in sys.path:
     sys.path.append(_repo_root)
 
-from textseedo.paths import ASSETS_ROOT, DATA_ROOT, REPO_ROOT
+from utilities.paths import ASSETS_ROOT, DATA_ROOT, REPO_ROOT
 
 DEFAULT_MANIFEST = REPO_ROOT / "configs" / "paths.yaml"
 TODO_HF_REPO = "TODO_USER_MODEL_REPO"

@@ -6,7 +6,7 @@ Every script and config resolves large-asset and dataset locations through this 
 
 Resolution order
 ----------------
-- ``REPO_ROOT``   : the repository root (this file is ``<repo>/textseedo/paths.py``).
+- ``REPO_ROOT``   : the repository root (this file is ``<repo>/utilities/paths.py``).
 - ``ASSETS_ROOT`` : ``$TSD_ASSETS`` if set, else ``<repo>/assets``. Holds downloaded checkpoints.
 - ``DATA_ROOT``   : ``$TSD_DATA``   if set, else ``<repo>/data``.   Holds datasets (TEXEDO + prepared).
 

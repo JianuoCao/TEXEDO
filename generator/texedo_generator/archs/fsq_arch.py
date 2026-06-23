@@ -486,7 +486,7 @@ class FSQVae(nn.Module):
 
         Returns:
             code_idx: (B, T') integer indices, range [0, codebook_size-1]
-            None (placeholder for MotionGPT compat)
+            None (placeholder for TEXEDO generator compat)
         """
         x_in = self._preprocess(features)           # (B, 36, T) delta space
         x_enc = self.encoder(x_in)                  # (B, output_emb_width, T')

@@ -8,7 +8,7 @@ clean entry point:
     distance = evaluator.score(motion_36d, caption)   # lower = better match
 
 ``score`` returns the L2 distance between the 512-d text and motion co-embeddings
-(the same "matching score" used by MotionGPT's FID/R-Precision/Matching-Score
+(the same "matching score" used by TEXEDO generator's FID/R-Precision/Matching-Score
 evaluation, here exposed for best-of-N candidate selection).
 
 Self-contained: torch + numpy only, no spaCy/regex POS tagger. Captions are

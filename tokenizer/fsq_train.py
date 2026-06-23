@@ -37,7 +37,7 @@ if current_dir not in sys.path:
 
 from fsq_arch import FSQVae, convert_to_csv_format, normalize_quaternions
 from fsq_dataloader import SlidingWindowDataset, create_dataloader
-from textseedo.paths import data as data_path
+from utilities.paths import data as data_path
 
 
 # ============================================================================

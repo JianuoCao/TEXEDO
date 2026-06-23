@@ -2,7 +2,7 @@
 
 Each ``(T, 36)`` motion is played back on the Unitree G1 model and rendered to an
 ``.mp4`` with MuJoCo's offscreen EGL renderer (no X server needed). This ports the
-proven renderer from ``GenMimic/scripts/visualize_csv_egl.py`` so the candidates
+proven renderer from ``in-repo visualization utilities`` so the candidates
 produced by ``pipeline.generate`` get real robot videos instead of static plots.
 
     python scripts/visualize_csv.py --input motion.csv --output-dir viz/
@@ -16,7 +16,7 @@ Input formats
   converted to CSV ordering on the fly before rendering.
 
 The G1 model XML defaults to the in-repo asset ``assets/robot/g1/g1_29dof_rev_1_0.xml``
-(resolved via ``textseedo.paths``); override with ``--model``.
+(resolved via ``utilities.paths``); override with ``--model``.
 """
 
 from __future__ import annotations
@@ -35,12 +35,12 @@ import numpy as np
 
 # Resolve the G1 model from the in-repo assets so nothing outside the repo is referenced.
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from textseedo.paths import assets
+from utilities.paths import assets
 
 DEFAULT_MODEL_PATH = str(assets("robot", "g1", "g1_29dof_rev_1_0.xml"))
 
 # NPZ joint order -> CSV (MuJoCo qpos) joint order. Mirrors
-# generator/mgpt/archs/fsq_arch.py:convert_to_csv_format.
+# generator/texedo_generator/archs/fsq_arch.py:convert_to_csv_format.
 _NPZ_TO_CSV = [
     0, 3, 6, 9, 13, 17, 1, 4, 7, 10, 14, 18,
     2, 5, 8, 11, 15, 19, 21, 23, 25, 27,

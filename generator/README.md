@@ -1,27 +1,31 @@
-# Generator — MotionGPT (FSQ multitask)
+# Generator — TEXEDO generator (FSQ multitask)
 
 A flan-t5-base language model over FSQ motion tokens, trained multitask (text→motion, motion→text,
 motion prediction). Stage 1 (the FSQ tokenizer) is frozen; this stage trains the LM.
 
+## Attribution
+Parts of the generator implementation are adapted from
+[OpenMotionLab/MotionGPT](https://github.com/OpenMotionLab/MotionGPT).
+
 ## Package
-`mgpt/` — the core package (import name `mgpt`), holding `archs`, `models`, `data`, `losses`,
+`texedo_generator/` — the core package (import name `texedo_generator`), holding `archs`, `models`, `data`, `losses`,
 `metrics`, `utils`. Key pieces:
-- `mgpt/models/mgpt.py` — the `MotionGPT` Lightning module.
-- `mgpt/archs/mgpt_lm.py` — flan-t5 LM wrapper (loads `google/flan-t5-base` from the HF hub).
-- `mgpt/archs/motion_tokenizer.py` — `FSQTokenizer` wrapper; `mgpt/utils/load_checkpoint.py` loads the
+- `texedo_generator/models/generator_model.py` — the `TEXEDO generator` Lightning module.
+- `texedo_generator/archs/language_model.py` — flan-t5 LM wrapper (loads `google/flan-t5-base` from the HF hub).
+- `texedo_generator/archs/motion_tokenizer.py` — `FSQTokenizer` wrapper; `texedo_generator/utils/load_checkpoint.py` loads the
   frozen FSQ checkpoint named by `TRAIN.PRETRAINED_VAE`.
-- `mgpt/data/CustomCombined.py` (the `mgpt.data` subpackage) — the multitask datamodule.
+- `texedo_generator/data/CustomCombined.py` (the `texedo_generator.data` subpackage) — the multitask datamodule.
 
 ## Configs (`configs/`)
-Loaded by `mgpt/config.py:parse_args`, which globs `configs/*/*.yaml` into namespaces. **Run from this
+Loaded by `texedo_generator/config.py:parse_args`, which globs `configs/*/*.yaml` into namespaces. **Run from this
 `generator/` directory** so `./configs` resolves.
 - `config_fsq_multitask.yaml` — primary experiment config (paths via `${oc.env:TSD_ASSETS|TSD_DATA}`).
 - `assets.yaml` — asset/dataset roots (passed as `--cfg_assets`).
-- `default_ours.yaml` — base defaults (auto-loaded).
-- `lm/default.yaml`, `evaluator/tm2t.yaml`, `vq/fsq.yaml` — sub-config namespaces.
+- `default.yaml` — base defaults (auto-loaded).
+- `language_model/default.yaml`, `evaluator/tm2t.yaml`, `fsq/default.yaml` — sub-config namespaces.
 
 Paths resolve from environment: `TSD_ASSETS` (checkpoints) and `TSD_DATA` (datasets). Importing
-`textseedo.paths` (or sourcing `.env`) sets sane defaults (`<repo>/assets`, `<repo>/data`).
+`utilities.paths` (or sourcing `.env`) sets sane defaults (`<repo>/assets`, `<repo>/data`).
 
 ## Data prep
 ```bash
@@ -49,5 +53,5 @@ checkpoint at `${TSD_ASSETS}/tokenizer/checkpoint_epoch_95.pt`.
 - flan-t5-base is pulled from the public HF hub (`google/flan-t5-base`) at runtime — not vendored.
 - SMPL rendering and the whisper/web-app path were intentionally dropped (the pipeline renders the
   Unitree G1 robot from the 36-dim representation).
-- This release is **FSQ-only**: the legacy VQVAE tokenizer (`DualVQVaeWrapper`, `vq/vqvae_ours.yaml`,
-  `vq/default.yaml`) has been removed. The only tokenizer is `FSQTokenizer` (`vq/fsq.yaml`).
+- This release is **FSQ-only**: legacy VQVAE tokenizer configs have been removed. The only tokenizer config is
+  `fsq/default.yaml`.

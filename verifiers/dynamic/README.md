@@ -5,7 +5,7 @@ progress of a generated 36-dim motion. It is one of two verifiers used for
 best-of-N candidate selection in the TEXEDO pipeline (the other is the
 semantic verifier in `verifiers/semantic/`). This component is self-contained
 (torch / numpy / pandas / sklearn / scipy only) and does **not** import from
-`generator` or `mGPT`.
+`generator` or `TEXEDO generator`.
 
 ## Architecture (`model.py`)
 
@@ -46,7 +46,7 @@ samples with the same success outcome, the formula ranks by dynamics quality
 ## Feature transform: 36 -> 94 dims (`dataset.py`)
 
 `transform_36_to_94(motion)` turns a raw `(T, 36)` motion (see
-`textseedo.motion_format`: root pos(3) + root quat wxyz(4) + 29 joints) into a
+`utilities.motion_format`: root pos(3) + root quat wxyz(4) + 29 joints) into a
 `(T, 94)` dynamics-aware feature vector:
 
 | Slice | Dims | Content |
@@ -86,14 +86,14 @@ loaded by `predict_rewards.py`) is a `torch.save` dict:
 | `accel_p95` | scalar | 95th percentile of `accel_dist` label across train samples, used to map raw accel error -> a `[0,1]` quality score |
 | `vel_p95` | scalar | 95th percentile of `vel_dist` label, same purpose for velocity error |
 
-Expected asset paths (see `textseedo.paths`):
+Expected asset paths (see `utilities.paths`):
 - `${TSD_ASSETS}/verifiers/dynamic/checkpoint_last.pt`
 - `${TSD_ASSETS}/verifiers/dynamic/norm_stats.npz`
 
 ## Training
 
 ```bash
-conda activate mgpt
+conda activate TEXEDO
 cd TEXEDO
 
 python -m verifiers.dynamic.train_verifier \

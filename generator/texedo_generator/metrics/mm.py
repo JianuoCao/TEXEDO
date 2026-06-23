@@ -6,7 +6,7 @@ from torchmetrics import Metric
 from torchmetrics.functional import pairwise_euclidean_distance
 from .utils import *
 import os
-from mgpt.config import instantiate_from_config
+from texedo_generator.config import instantiate_from_config
 
 class MMMetrics(Metric):
     full_state_update = True

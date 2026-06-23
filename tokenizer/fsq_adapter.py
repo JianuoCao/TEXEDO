@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-FSQ Motion Tokenizer Adapter: Wraps FSQVae for MotionGPT compatibility.
+FSQ Motion Tokenizer Adapter: Wraps FSQVae for TEXEDO generator compatibility.
 
-Interface (MotionGPT-compatible):
+Interface (TEXEDO generator-compatible):
     encode(features) -> (motion_tokens, lengths)
     decode(motion_tokens) -> features
 
@@ -27,7 +27,7 @@ from fsq_arch import FSQVae
 
 class FSQAdapter(nn.Module):
     """
-    Adapter: FSQVae → MotionGPT-compatible interface.
+    Adapter: FSQVae → TEXEDO generator-compatible interface.
 
     Single codebook, codes in [0, codebook_size-1].
     """

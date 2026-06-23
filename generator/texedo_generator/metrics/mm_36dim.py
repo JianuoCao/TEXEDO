@@ -16,7 +16,7 @@ class MMMetrics36Dim(MMMetrics):
 
     def _get_t2m_evaluator(self, cfg):
         """Load from custom36 evaluator path instead of hardcoded 't2m'."""
-        from mgpt.config import instantiate_from_config
+        from texedo_generator.config import instantiate_from_config
 
         self.t2m_textencoder = instantiate_from_config(cfg.METRIC.TM2T.t2m_textencoder)
         self.t2m_moveencoder = instantiate_from_config(cfg.METRIC.TM2T.t2m_moveencoder)

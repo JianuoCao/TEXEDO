@@ -3,18 +3,18 @@ import sys
 # Make the repo root importable when run from generator/, and set TSD_ASSETS/TSD_DATA
 # env defaults so config ${oc.env:...} interpolation resolves.
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-import textseedo.paths  # noqa: F401,E402
+import utilities.paths  # noqa: F401,E402
 
 import glob
 import torch
 import pytorch_lightning as pl
 from omegaconf import OmegaConf
-from mgpt.callback import build_callbacks
-from mgpt.config import parse_args, instantiate_from_config
-from mgpt.data.build_data import build_data
-from mgpt.models.build_model import build_model
-from mgpt.utils.logger import create_logger
-from mgpt.utils.load_checkpoint import load_pretrained, load_pretrained_vae
+from texedo_generator.callback import build_callbacks
+from texedo_generator.config import parse_args, instantiate_from_config
+from texedo_generator.data.build_data import build_data
+from texedo_generator.models.build_model import build_model
+from texedo_generator.utils.logger import create_logger
+from texedo_generator.utils.load_checkpoint import load_pretrained, load_pretrained_vae
 import pdb
 
 # PyTorch 2.6 changed weights_only default to True. PyTorch Lightning's internal
@@ -119,7 +119,7 @@ def main():
     #           (A100, A6000, RTX 3090, RTX 4090, H100, …).
     #           If you move to a pre-Ampere GPU (V100, P100, T4 etc.) you MUST
     #           change this back to '16-mixed' AND apply the autocast(enabled=False)
-    #           guard in mgpt_lm.py:generate_direct() to protect generation,
+    #           guard in language_model.py:generate_direct() to protect generation,
     #           or simply use 32-true (full fp32) at the cost of 2× memory.
     #
     # TODO if changing machines:

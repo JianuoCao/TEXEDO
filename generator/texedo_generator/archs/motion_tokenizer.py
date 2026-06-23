@@ -3,14 +3,14 @@ Unified Motion Tokenizer Interface
 ===================================
 
 Provides a common encode/decode API for the motion tokenizer so the
-MotionGPT model and LM are agnostic to the underlying tokenizer type.
+TEXEDO generator model and LM are agnostic to the underlying tokenizer type.
 
 Concrete implementation:
   - FSQTokenizer : wraps FSQVae with a single-codebook direct-code scheme
 
 Config-based instantiation:
-  # configs/vq/fsq.yaml
-  target: mgpt.archs.motion_tokenizer.FSQTokenizer
+  # configs/fsq/default.yaml
+  target: texedo_generator.archs.motion_tokenizer.FSQTokenizer
   params: ...
 """
 
@@ -98,7 +98,7 @@ class MotionTokenizerBase(nn.Module, abc.ABC):
 
 class FSQTokenizer(MotionTokenizerBase):
     """
-    Wraps FSQVae as a MotionGPT-compatible tokenizer.
+    Wraps FSQVae as a TEXEDO generator-compatible tokenizer.
 
     Single codebook — no interleave/deinterleave.
     codebook_size = product(fsq_levels)  (default 7776).
@@ -106,7 +106,7 @@ class FSQTokenizer(MotionTokenizerBase):
 
     def __init__(self, **fsq_kwargs):
         super().__init__()
-        from mgpt.archs.fsq_arch import FSQVae
+        from texedo_generator.archs.fsq_arch import FSQVae
         self.fsqvae = FSQVae(**fsq_kwargs)
 
     # -- properties -------------------------------------------------------

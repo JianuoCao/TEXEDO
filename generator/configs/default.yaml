@@ -44,20 +44,18 @@ TEST:
   REP_I: 0 # For counting replication times
 
 model:
-  target: mgpt.models.mgpt.MotionGPT
+  target: texedo_generator.models.generator_model.TEXEDOGenerator
   params:
     condition: 'text'
     task: 't2m'
-    lm: ${lm.default}
-    motion_vae: ${vq.fsq}
+    lm: ${language_model.default}
+    motion_vae: ${fsq.default}
 
     # Related parameters
     stage: ${TRAIN.STAGE}
     debug: ${DEBUG}
     codebook_size: 7776   # prod([3,3,3,3,3,2,2,2,2,2]) — FSQ single codebook
     metrics_dict: ${METRIC.TYPE}
-vq:
-  target: mgpt.archs.motion_tokenizer.FSQTokenizer
 LOSS:
   LAMBDA_REC: 1.0 # Lambda for reconstruction losses
   LAMBDA_JOINT: 1.0 # Lambda for joint losses
@@ -86,7 +84,7 @@ METRIC:
   TM2T: ${evaluator.tm2t}
 
 DATASET:
-  target: mgpt.data.CustomCombined.CustomDataModule_Combined
+  target: texedo_generator.data.CustomCombined.CustomDataModule_Combined
   CODE_PATH: 'TOKENS_FSQ'
   TASK_ROOT: ''
   TASK_PATH: ''
@@ -131,7 +129,7 @@ DATASET:
     STD_TEXT: False
 
 ABLATION:
-  # For MotionGPT
+  # For TEXEDO generator
   use_length: False
   predict_ratio: 0.2
   inbetween_ratio: 0.25

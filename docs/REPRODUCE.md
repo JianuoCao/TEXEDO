@@ -3,10 +3,9 @@
 All paths resolve from `TSD_ASSETS` (checkpoints, default `./assets`) and `TSD_DATA`
 (datasets, default `./data`). Importing the package or sourcing `.env` sets the defaults.
 
-> **Environments.** Per the project convention, use the `mgpt` conda env for the generator
-> and verifiers (needs `transformers`), and the `mimic` env for the FSQ tokenizer / data prep /
-> visualization. Both training and inference run on **CPU** when no GPU is present (slow);
-> they auto-select CUDA when available.
+> **Environment.** Use the single `TEXEDO` conda environment created from `environment.yml`
+> for the generator, tokenizer, verifiers, data preparation, and visualization. Both training
+> and inference run on **CPU** when no GPU is present (slow); they auto-select CUDA when available.
 >
 > **What is reproducible from the public TEXEDO dataset:** the **generator** and **semantic
 > verifier** train directly from the prepared `CustomCombined`. The **FSQ tokenizer** and

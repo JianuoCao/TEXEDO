@@ -6,7 +6,7 @@ from torchmetrics import Metric
 from .utils import *
 from bert_score import score as score_bert
 import spacy
-from mgpt.config import instantiate_from_config
+from texedo_generator.config import instantiate_from_config
 
 class M2TMetrics(Metric):
 

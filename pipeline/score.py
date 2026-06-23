@@ -22,7 +22,7 @@ import numpy as np
 # Allow running as a plain script (python pipeline/score.py) as well as -m.
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from textseedo.paths import assets
+from utilities.paths import assets
 
 
 class DynamicScorer:

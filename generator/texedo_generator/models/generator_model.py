@@ -4,18 +4,18 @@ import os
 import random
 import torch
 import time
-from mgpt.config import instantiate_from_config
+from texedo_generator.config import instantiate_from_config
 from os.path import join as pjoin
-from mgpt.losses.mgpt import GPTLosses
-from mgpt.models.base import BaseModel
+from texedo_generator.losses.generator_losses import GeneratorLosses
+from texedo_generator.models.base import BaseModel
 from .base import BaseModel
 import json
-# NOTE: the upstream `mGPT.render.matplot.plot_3d_global` import was dropped here.
+# NOTE: the unused training-time renderer import was dropped here.
 # It was imported but never used (no `plot_3d.*` calls in this file), and render/
 # is out of scope for the train+inference-only generator package (see CONTRACT.md).
 
 import pdb
-class MotionGPT(BaseModel):
+class TEXEDOGenerator(BaseModel):
     """
     Stage 1 Motion Tokenizer
     Stage 2 Motion-language pretrian
@@ -54,7 +54,7 @@ class MotionGPT(BaseModel):
 
         # Instantiate the losses
         self._losses = torch.nn.ModuleDict({
-            split: GPTLosses(cfg, self.hparams.stage, self.datamodule.njoints)
+            split: GeneratorLosses(cfg, self.hparams.stage, self.datamodule.njoints)
             for split in ["losses_train", "losses_test", "losses_val"]
         })
 

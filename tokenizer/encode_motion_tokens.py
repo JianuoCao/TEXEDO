@@ -10,7 +10,7 @@ Usage:
         --device cuda
 
 (``${TSD_ASSETS}`` / ``${TSD_DATA}`` are environment variables resolved by
-``textseedo.paths``; the CLI defaults below fall back to them automatically.)
+``utilities.paths``; the CLI defaults below fall back to them automatically.)
 """
 
 import os
@@ -31,7 +31,7 @@ if _repo_root not in sys.path:
     sys.path.append(_repo_root)
 
 from fsq_adapter import load_fsq_adapter
-from textseedo.paths import assets as assets_path, data as data_path
+from utilities.paths import assets as assets_path, data as data_path
 
 
 def encode_motion_file(adapter, motion_file: str, device: str = "cuda") -> np.ndarray:

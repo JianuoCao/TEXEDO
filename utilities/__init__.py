@@ -7,8 +7,8 @@ Components
 - verifiers  : dynamic (physical plausibility reward) + semantic (text-motion match)
 - pipeline   : generate N candidates -> score -> best-of-N selection (inference)
 
-Path resolution lives in :mod:`textseedo.paths`; the 36-dim motion layout lives in
-:mod:`textseedo.motion_format`.
+Path resolution lives in :mod:`utilities.paths`; the 36-dim motion layout lives in
+:mod:`utilities.motion_format`.
 """
 
 __version__ = "0.1.0"

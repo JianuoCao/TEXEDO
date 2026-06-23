@@ -5,7 +5,7 @@ from torch import Tensor
 from torchmetrics import Metric
 from torchmetrics.functional import pairwise_euclidean_distance
 from .utils import *
-from mgpt.config import instantiate_from_config
+from texedo_generator.config import instantiate_from_config
 
 class TM2TMetrics(Metric):
     def __init__(self,

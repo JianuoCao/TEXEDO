@@ -14,15 +14,15 @@ import time
 import random
 import shutil
 import argparse
-from mgpt.models.build_model import build_model
-from mgpt.data.build_data import build_data
-from mgpt.data.humanml.utils.word_vectorizer import WordVectorizer
+from texedo_generator.models.build_model import build_model
+from texedo_generator.data.build_data import build_data
+from texedo_generator.data.humanml.utils.word_vectorizer import WordVectorizer
 # NOTE: upstream imported `convert_to_csv_format` from the (unpackaged) top-level
 # `scripts/convert_output_to_36dim.py`, whose module body had hardcoded absolute
-# paths and an eager legacy-VQVAE import. `mgpt.archs.fsq_arch` ships an
+# paths and an eager legacy-VQVAE import. `texedo_generator.archs.fsq_arch` ships an
 # identical `convert_to_csv_format` helper with none of that baggage.
-from mgpt.archs.fsq_arch import convert_to_csv_format
-from textseedo.paths import assets
+from texedo_generator.archs.fsq_arch import convert_to_csv_format
+from utilities.paths import assets
 
 # Run on GPU when available, else CPU (keeps the demo runnable without a GPU).
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -39,7 +39,7 @@ def root_pos_to_vel_np(motion, root_dims=3):
 
 
 def get_matching_evaluator_params(cfg):
-    """Read evaluator settings from the active MotionGPT config."""
+    """Read evaluator settings from the active TEXEDO generator config."""
     params = {
         't2m_path': str(assets("verifiers", "semantic", "t2m_custom36_combinedv2")),
         'max_motion_length': 2048,
@@ -77,14 +77,14 @@ def get_matching_evaluator_params(cfg):
 # # FSQ with explicit config + checkpoint
 # python demo_ours.py --task t2m \
 #     --cfg configs/config_custom_all_stage2_fsq.yaml \
-#     --checkpoint experiments/mgpt/CustomDataAll_Stage2_FSQ/checkpoints/last.ckpt
+#     --checkpoint experiments/texedo_generator/CustomDataAll_Stage2_FSQ/checkpoints/last.ckpt
 # python demo_ours.py --task m2t \
 #     --cfg configs/config_custom_all_stage2_fsq.yaml \
-#     --checkpoint experiments/mgpt/CustomDataAll_Stage2_FSQ_m2t/checkpoints/last.ckpt
+#     --checkpoint experiments/texedo_generator/CustomDataAll_Stage2_FSQ_m2t/checkpoints/last.ckpt
 # # VQVAE (original)
 # python demo_ours.py --task t2m \
 #     --cfg configs/config_custom_all_stage2.yaml \
-#     --checkpoint experiments/mgpt/CustomDataAll_Stage2_t2m/checkpoints/last.ckpt
+#     --checkpoint experiments/texedo_generator/CustomDataAll_Stage2_t2m/checkpoints/last.ckpt
 # =============================================================================
 # Evaluator for per-sample matching score
 # =============================================================================
@@ -97,7 +97,7 @@ class MatchingScoreEvaluator:
                  max_motion_length=2048,
                  unit_len=4,
                  root_dims=3):
-        from mgpt.archs.tm2t_evaluator import (
+        from texedo_generator.archs.tm2t_evaluator import (
             TextEncoderBiGRUCo, MovementConvEncoder, MotionEncoderBiGRUCo
         )
         if t2m_path is None:
@@ -227,7 +227,7 @@ def demo_ours(task="t2m", num_samples=3, temperature=0.9, top_k=50, top_p=0.95,
     print(f"Loading config from {cfg_path}")
     import sys
     sys.argv = ['demo_ours.py', '--cfg', cfg_path, '--cfg_assets', cfg_assets_path]
-    from mgpt.config import parse_args
+    from texedo_generator.config import parse_args
     cfg = parse_args(phase="test")
     print(f"Config loaded")
     print(f"   Dataset: {cfg.DATASET.target}")

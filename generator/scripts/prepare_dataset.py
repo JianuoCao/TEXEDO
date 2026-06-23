@@ -37,7 +37,7 @@ import numpy as np
 # Allow running as a plain script (python generator/scripts/prepare_dataset.py).
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from textseedo.paths import ASSETS_ROOT, DATA_ROOT, assets, data
+from utilities.paths import ASSETS_ROOT, DATA_ROOT, assets, data
 
 # TEXEDO's "validation" split corresponds to CustomCombined's "val" split file.
 _HF_SPLIT_TO_LOCAL = {"train": "train", "validation": "val", "test": "test"}

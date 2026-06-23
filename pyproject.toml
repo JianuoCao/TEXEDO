@@ -13,7 +13,7 @@ license = { text = "MIT" }
 [tool.setuptools.packages.find]
 where = ["."]
 include = [
-    "textseedo*",
+    "utilities*",
     "tokenizer*",
     "generator*",
     "verifiers*",

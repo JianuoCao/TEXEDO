@@ -441,14 +441,14 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="M3.27 6.96L12 12.01l8.73-5.05"/><path d="M12 22.08V12"/></svg>
       Models
     </a>
-    <a class="pub-btn" href="https://huggingface.co/JianuoCao/TEXEDO-Checkpoint/" target="_blank" rel="noopener">
+    <a class="pub-btn" href="https://huggingface.co/datasets/JianuoCao/TEXEDO" target="_blank" rel="noopener">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
       Data
     </a>
-    <span class="pub-btn" aria-disabled="true">
+    <a class="pub-btn" href="https://arxiv.org/abs/2606.22998" target="_blank" rel="noopener">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg>
       Paper
-    </span>
+    </a>
   </div>
 </header>
 
@@ -940,7 +940,7 @@ Across large-scale simulation studies and real-world deployment on a Unitree G1,
     shuffleEl.addEventListener('click',shufflePrompts);
 
     /* ---- sample 8 candidates ----------------------------------------- */
-    runEl.addEventListener('click',()=>{
+    function sampleCandidates(){
       const p=DATA.find(x=>x.id===state.pid); if(!p) return;
       state.drawn=sample(p.variants,DRAW);
       seeStep.classList.add('live');
@@ -948,7 +948,8 @@ Across large-scale simulation studies and real-world deployment on a Unitree G1,
       doBlock.hidden=false;
       resultEl.hidden=true; resultEl.classList.remove('show');
       updateSelection();
-    });
+    }
+    runEl.addEventListener('click',sampleCandidates);
 
     function renderGrid(){
       gridEl.innerHTML=state.drawn.map((c,i)=>`
@@ -1057,6 +1058,7 @@ Across large-scale simulation studies and real-world deployment on a Unitree G1,
     });
 
     shufflePrompts();
+    sampleCandidates();
   })();
 </script>
 </body>

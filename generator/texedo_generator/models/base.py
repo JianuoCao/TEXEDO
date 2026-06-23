@@ -6,8 +6,8 @@ from pathlib import Path
 from pytorch_lightning import LightningModule
 from os.path import join as pjoin
 from collections import OrderedDict
-from mgpt.metrics import BaseMetrics
-from mgpt.config import get_obj_from_str
+from texedo_generator.metrics import BaseMetrics
+from texedo_generator.config import get_obj_from_str
 
 
 class BaseModel(LightningModule):

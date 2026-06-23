@@ -1,6 +1,6 @@
 # FSQ Motion Tokenizer configuration
 # Single codebook: codebook_size = prod(fsq_levels) = 3^5 * 2^5 = 7776
-target: mgpt.archs.motion_tokenizer.FSQTokenizer
+target: texedo_generator.archs.motion_tokenizer.FSQTokenizer
 params:
   nfeats: 36
   fsq_levels: [3, 3, 3, 3, 3, 2, 2, 2, 2, 2]

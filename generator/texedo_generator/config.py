@@ -98,7 +98,7 @@ def parse_args(phase="train"):
 
     # Default config
     if phase in ["train", "test", "demo"]:
-        cfg_defualt = "./configs/default_ours.yaml"
+        cfg_defualt = "./configs/default.yaml"
     elif phase == "render":
         cfg_defualt = "./configs/render.yaml"
     elif phase == "webui":
@@ -184,7 +184,7 @@ def parse_args(phase="train"):
     # Load yaml config files
     OmegaConf.register_new_resolver("eval", eval)
     cfg_assets = OmegaConf.load(params.cfg_assets)
-    cfg_base = OmegaConf.load(pjoin(cfg_assets.CONFIG_FOLDER, 'default_ours.yaml'))
+    cfg_base = OmegaConf.load(pjoin(cfg_assets.CONFIG_FOLDER, 'default.yaml'))
     cfg_exp = OmegaConf.merge(cfg_base, OmegaConf.load(params.cfg))
     if not cfg_exp.FULL_CONFIG:
         cfg_exp = get_module_config(cfg_exp, cfg_assets.CONFIG_FOLDER)

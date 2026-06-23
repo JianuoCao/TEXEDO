@@ -2,7 +2,7 @@
 # Based on fsq_config_ln_expA.yaml with data path updated to combined folder.
 #
 # ${oc.env:TSD_ASSETS} / ${oc.env:TSD_DATA} are resolved by OmegaConf at load
-# time (tokenizer/fsq_train.py:load_config); textseedo.paths exports sane
+# time (tokenizer/fsq_train.py:load_config); utilities.paths exports sane
 # in-repo defaults (<repo>/assets, <repo>/data) if the env vars are unset.
 #
 # normalization_stats_file intentionally points at the small stats file that

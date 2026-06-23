@@ -2,7 +2,7 @@
 
 Finite Scalar Quantization (FSQ) tokenizer that discretizes 36-dim Unitree G1
 motion (`root_pos(3) + root_quat_wxyz(4) + joint_pos(29)`, see
-`textseedo.motion_format`) into a single stream of discrete tokens. Used as
+`utilities.motion_format`) into a single stream of discrete tokens. Used as
 Stage-1 of the TEXEDO pipeline; the generator (`generator/`) is trained
 on top of the resulting token sequences.
 
@@ -29,7 +29,7 @@ checkpoints).
 
 ## Paths
 
-Everything resolves through `textseedo.paths` (Python) or
+Everything resolves through `utilities.paths` (Python) or
 `${oc.env:TSD_ASSETS}` / `${oc.env:TSD_DATA}` (YAML configs) — see
 `docs/tasks/CONTRACT.md`. No absolute user paths are baked into this
 directory. Expected locations:

@@ -1,7 +1,7 @@
 """
-CustomCombined data module for MotionGPT.
+CustomCombined data module for TEXEDO generator.
 
-Combined dataset: AMASS + TextSeeDo motions (32 655 + 14 971 files).
+Combined dataset: AMASS + TEXEDO motions (32 655 + 14 971 files).
 Data at 50fps, 36-dim features (root xyz 3 + root quat 4 + joint angles 29).
 Tokens from FSQ (single-stream, codebook size 7776).
 

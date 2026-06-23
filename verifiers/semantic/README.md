@@ -4,9 +4,9 @@ A BiGRU text/motion matching evaluator that scores how well a generated 36-dim
 motion matches a text caption. It is one of two verifiers used for best-of-N
 candidate selection in the TEXEDO pipeline (the other is the dynamic
 verifier in `verifiers/dynamic/`). Same architecture family as the
-text-to-motion / MotionGPT evaluator (FID / R-Precision / Matching-Score),
+text-to-motion / TEXEDO generator evaluator (FID / R-Precision / Matching-Score),
 retrained here for the 36-dim Unitree G1 motion format (root pos(3) + root
-quat wxyz(4) + 29 joints, see `textseedo.motion_format`). Self-contained
+quat wxyz(4) + 29 joints, see `utilities.motion_format`). Self-contained
 (torch / numpy only).
 
 ## Files
@@ -81,7 +81,7 @@ text_mot_match/eval/E###.txt                     # periodic pos/neg distance dum
 ## Train
 
 ```bash
-conda activate mgpt
+conda activate TEXEDO
 cd TEXEDO
 
 python verifiers/semantic/train_evaluator.py --step all --gpu 0

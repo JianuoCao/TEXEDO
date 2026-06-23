@@ -1,7 +1,7 @@
 """
 Train the text-motion matching (semantic) evaluator for 36-dim custom motion data.
 
-Same evaluator architecture used by MotionGPT for computing FID, R-Precision,
+Same evaluator architecture used by TEXEDO generator for computing FID, R-Precision,
 Diversity, and Matching Score metrics.
 
 36-dim motion: root xyz (3) + root quat (4) + joint angles (29).
@@ -50,7 +50,7 @@ from torch.utils.data._utils.collate import default_collate
 from omegaconf import OmegaConf
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-import textseedo.paths  # noqa: F401,E402
+import utilities.paths  # noqa: F401,E402
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 try:  # works both as a package import and as a script run from this directory
@@ -172,7 +172,7 @@ class Config:
         self.motion_dir = pjoin(self.data_root, "new_joint_vecs")
         self.text_dir = pjoin(self.data_root, "texts")
 
-        # Match MotionGPT expected structure:
+        # Match TEXEDO generator expected structure:
         # {save_root}/{dataname}/t2m/{subdir}/model/
         base = pjoin(self.save_root, "custom36", "t2m")
 
@@ -184,7 +184,7 @@ class Config:
         self.match_eval_dir = pjoin(base, "text_mot_match", "eval")
         self.match_log_dir = pjoin(base, "text_mot_match", "log")
 
-        # Meta dir for mean/std (also matches MotionGPT's MEAN_STD_PATH structure)
+        # Meta dir for mean/std (also matches TEXEDO generator's MEAN_STD_PATH structure)
         self.meta_dir = pjoin(base, "Comp_v6_KLD01", "meta")
 
 

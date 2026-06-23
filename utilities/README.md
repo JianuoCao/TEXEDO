@@ -1,4 +1,4 @@
-# `textseedo/` — shared utilities
+# `utilities/` — shared utilities
 
 This is **not** a model. It is the small shared package that every component imports so
 that paths and the motion format are defined in exactly one place.
@@ -13,7 +13,7 @@ Why it exists: no absolute path is baked into the codebase. Checkpoints resolve 
 `TSD_DATA` environment variables (defaulting to `./assets` and `./data`).
 
 ```python
-from textseedo.paths import assets, data
+from utilities.paths import assets, data
 assets("tokenizer/checkpoint_epoch_95.pt")   # -> <assets>/tokenizer/checkpoint_epoch_95.pt
 data("CustomCombined/new_joint_vecs")        # -> <data>/CustomCombined/new_joint_vecs
 ```
