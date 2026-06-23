@@ -37,13 +37,11 @@ TEXEDO is a text-to-motion pipeline for the Unitree G1 humanoid. It generates mu
 
 ## TODOs
 
-<p>
-  <input type="checkbox" checked disabled> Release datasets.<br>
-  <input type="checkbox" checked disabled> Release checkpoints for the tokenizer, generator, and verifiers.<br>
-  <input type="checkbox" checked disabled> Open-source the training pipeline.<br>
-  <input type="checkbox" disabled> Publish a fast, large-scale controller-aware data collection pipeline.<br>
-  <input type="checkbox" disabled> Add functional demos for text-to-motion, motion-to-text, and motion prediction.
-</p>
+- [x] Release datasets.
+- [x] Release checkpoints for the tokenizer, generator, and verifiers.
+- [x] Open-source the training pipeline.
+- [ ] Publish a fast, large-scale controller-aware data collection pipeline.
+- [ ] Add functional demos for text-to-motion, motion-to-text, and motion prediction.
 
 ## Installation
 
