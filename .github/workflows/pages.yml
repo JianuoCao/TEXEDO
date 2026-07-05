@@ -25,12 +25,84 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: gh-pages
+      - name: Prepare Pages artifact
+        run: |
+          set -euo pipefail
+          rm -rf _site
+          rsync -a \
+            --exclude='.git' \
+            --exclude='_site' \
+            --exclude='videos/web_cases' \
+            ./ _site/
+
+          node <<'NODE'
+          const fs = require('fs');
+          const path = require('path');
+          const src = fs.readFileSync('demo_data.js', 'utf8');
+          const match = src.match(/window\.DEMO_DATA\s*=\s*(\[[\s\S]*\]);?\s*$/);
+          if (!match) throw new Error('Could not parse demo_data.js');
+
+          const data = JSON.parse(match[1]);
+
+          function pickVariants(variants) {
+            const picked = [];
+            const seen = new Set();
+            const add = (variant) => {
+              if (!variant || seen.has(variant.key) || picked.length >= 8) return;
+              seen.add(variant.key);
+              picked.push(variant);
+            };
+            const byTexedo = [...variants].sort((a, b) =>
+              ((b.rdyn || 0) + (b.rtext || 0)) - ((a.rdyn || 0) + (a.rtext || 0))
+            );
+            const byDyn = [...variants].sort((a, b) => (b.rdyn || 0) - (a.rdyn || 0));
+            const byText = [...variants].sort((a, b) => (b.rtext || 0) - (a.rtext || 0));
+            const byWeakDyn = [...variants].sort((a, b) => (a.rdyn || 0) - (b.rdyn || 0));
+            const byWeakText = [...variants].sort((a, b) => (a.rtext || 0) - (b.rtext || 0));
+
+            byTexedo.slice(0, 3).forEach(add);
+            add(byDyn[0]);
+            add(byText[0]);
+            add(byWeakDyn[0]);
+            add(byWeakText[0]);
+            variants.forEach(add);
+            return picked;
+          }
+
+          for (const prompt of data) {
+            prompt.variants = pickVariants(prompt.variants || []);
+            const srcDir = path.join('videos', 'web_cases', `prompt_${prompt.id}`);
+            const dstDir = path.join('_site', srcDir);
+            fs.mkdirSync(path.join(dstDir, 'video'), { recursive: true });
+
+            const promptTxt = path.join(srcDir, `prompt_${prompt.id}.txt`);
+            if (fs.existsSync(promptTxt)) {
+              fs.copyFileSync(promptTxt, path.join(dstDir, `prompt_${prompt.id}.txt`));
+            }
+
+            for (const variant of prompt.variants) {
+              const videoSrc = path.join(srcDir, 'video', `${variant.key}.mp4`);
+              const videoDst = path.join(dstDir, 'video', `${variant.key}.mp4`);
+              if (!fs.existsSync(videoSrc)) {
+                throw new Error(`Missing demo video: ${videoSrc}`);
+              }
+              fs.copyFileSync(videoSrc, videoDst);
+            }
+          }
+
+          fs.writeFileSync(
+            path.join('_site', 'demo_data.js'),
+            `window.DEMO_DATA = ${JSON.stringify(data)};\n`
+          );
+          NODE
+
+          du -sh _site
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Upload website artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: .
+          path: _site
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
